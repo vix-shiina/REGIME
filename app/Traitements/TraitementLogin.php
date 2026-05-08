@@ -68,4 +68,32 @@ class TraitementLogin
         $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');
         return redirect()->to('/SignIn');
     }
+
+    public function adminSignin(array $data)
+    {
+        $session = service('session');
+
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+        if (!$email || !$password){
+            $session->setFlashdata('flash_error', 'Tous les champs sont requis.');
+            return redirect()->to('/admin');
+        }
+
+        $stmt = $this->pdo->prepare('SELECT Id,Nom,Prenom,UserTypeId FROM USER WHERE Email = ? AND Password = ?');
+        $stmt->execute([$email,$password]);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if ($user){
+            if ((int)$user['UserTypeId'] !== 2){
+                $session->setFlashdata('flash_error', 'Accès admin refusé.');
+                return redirect()->to('/admin');
+            }
+            $session->set('user_id', $user['Id']);
+            $session->setFlashdata('flash_success', 'Connexion admin réussie. Bienvenue '.$user['Prenom'].'.');
+            return redirect()->to('/admin-dashboard');
+        }
+
+        $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');
+        return redirect()->to('/admin');
+    }
 }

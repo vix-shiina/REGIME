@@ -31,4 +31,24 @@ class Auth extends BaseController
         $traitement = new TraitementLogin();
         return $traitement->signup($this->request->getPost());
     }
+
+    public function logout()
+    {
+        session();
+        session()->destroy();
+        return redirect()->to('/SignIn');
+    }
+
+    public function adminLogin()
+    {
+        session();
+        return view('SignInAdmin');
+    }
+
+    public function adminLoginPost()
+    {
+        session();
+        $traitement = new TraitementLogin();
+        return $traitement->adminSignin($this->request->getPost());
+    }
 }
