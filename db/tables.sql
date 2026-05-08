@@ -1,0 +1,109 @@
+DROP DATABASE IF EXISTS REGIME;
+CREATE DATABASE REGIME;
+USE REGIME;
+
+CREATE TABLE UserType (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserType VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Genre (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Genre VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE USER(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Nom VARCHAR(255) NOT NULL,
+    Prenom VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    UserTypeId INT,
+    GenreId INT,
+    FOREIGN KEY (UserTypeId) REFERENCES UserType(Id),
+    FOREIGN KEY (GenreId) REFERENCES Genre(Id)
+);
+
+CREATE TABLE UserInfo(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    Age INT,
+    Taille FLOAT,
+    Poids FLOAT,
+    FOREIGN KEY (UserId) REFERENCES USER(Id)
+);
+
+CREATE TABLE Evolution(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    DateEvolution DATE,
+    Poids FLOAT,
+    FOREIGN KEY (UserId) REFERENCES USER(Id)
+);
+
+CREATE TABLE TypeDeRegime(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    TypeDeRegime VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE REGIME(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    RegimeNom VARCHAR(255) NOT NULL,
+    TypeDeRegimeId INT,
+    Prix FLOAT,
+    Efficacite FLOAT,
+    FOREIGN KEY (TypeDeRegimeId) REFERENCES TypeDeRegime(Id)
+);
+
+CREATE TABLE RegimeUser(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    RegimeId INT,
+    DateDebut DATE,
+    DureeEnJours INT,
+    Paiement ENUM('Abonnement', 'Paiement unique'),
+    FOREIGN KEY (UserId) REFERENCES USER(Id),
+    FOREIGN KEY (RegimeId) REFERENCES REGIME(Id)
+);
+
+CREATE TABLE CompoRegime(
+    RegimeId INT,
+    Viande FLOAT,
+    Poisson FLOAT,
+    Volailles FLOAT,
+    FOREIGN KEY (RegimeId) REFERENCES REGIME(Id)
+);
+
+CREATE TABLE TypeDeSport(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    TypeDeSport VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE SPORT(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    SportNom VARCHAR(255) NOT NULL,
+    TypeDeSportId INT,
+    FOREIGN KEY (TypeDeSportId) REFERENCES TypeDeSport(Id)
+);
+
+CREATE TABLE SportUser(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    SportId INT,
+    DateDebut DATE,
+    DureeEnJours INT,
+    FOREIGN KEY (UserId) REFERENCES USER(Id),
+    FOREIGN KEY (SportId) REFERENCES SPORT(Id)
+);
+
+CREATE TABLE Code(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Code VARCHAR(50) NOT NULL,
+    Valeur FLOAT
+);
+
+CREATE TABLE GoldUsers(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    FOREIGN KEY (UserID) REFERENCES USER(Id)
+);
