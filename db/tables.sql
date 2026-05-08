@@ -50,8 +50,8 @@ CREATE TABLE REGIME(
     Id INT PRIMARY KEY AUTO_INCREMENT,
     RegimeNom VARCHAR(255) NOT NULL,
     TypeDeRegimeId INT,
-    Prix FLOAT,
-    Efficacite FLOAT,
+    PrixJournaliere FLOAT,
+    EfficacitePoids FLOAT,
     FOREIGN KEY (TypeDeRegimeId) REFERENCES TypeDeRegime(Id)
 );
 
@@ -83,6 +83,7 @@ CREATE TABLE SPORT(
     Id INT PRIMARY KEY AUTO_INCREMENT,
     SportNom VARCHAR(255) NOT NULL,
     TypeDeSportId INT,
+    EfficacitePoids FLOAT,
     FOREIGN KEY (TypeDeSportId) REFERENCES TypeDeSport(Id)
 );
 
@@ -100,10 +101,4 @@ CREATE TABLE Code(
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Code VARCHAR(50) NOT NULL,
     Valeur FLOAT
-);
-
-CREATE TABLE GoldUsers(
-    Id INT PRIMARY KEY AUTO_INCREMENT,
-    UserID INT,
-    FOREIGN KEY (UserID) REFERENCES USER(Id)
 );
