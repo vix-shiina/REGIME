@@ -18,7 +18,7 @@ CREATE TABLE USER(
     Prenom VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL,
     Password VARCHAR(255) NOT NULL,
-    UserTypeId INT,
+    UserTypeId INT DEFAULT 1,
     GenreId INT,
     FOREIGN KEY (UserTypeId) REFERENCES UserType(Id),
     FOREIGN KEY (GenreId) REFERENCES Genre(Id)

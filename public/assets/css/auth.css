@@ -1,0 +1,20 @@
+/* Auth pages: simple, gray background, split layout */
+html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#f0f0f2}
+.admin-link{position:fixed;top:12px;right:14px;color:#666;font-size:13px;opacity:0.8;text-decoration:none}
+.auth-page.split{display:flex;height:100vh}
+.auth-page .left-side{flex:1;background:#ddd;display:flex;align-items:center;justify-content:center}
+.auth-page .left-side img{max-width:90%;max-height:80vh;object-fit:contain}
+.auth-page .right-side{flex:1;display:flex;align-items:center;justify-content:center}
+.right-side form{width:360px;background:#fff;padding:28px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+.right-side h2{margin:0 0 14px;font-size:22px;color:#333}
+.right-side label{display:block;margin-top:10px;font-size:13px;color:#666}
+.right-side input,.right-side select{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:4px}
+.right-side button{margin-top:16px;width:100%;padding:10px;background:#4a76b8;color:#fff;border:none;border-radius:4px;cursor:pointer}
+.muted{margin-top:12px;font-size:13px;color:#777}
+.muted a{color:#4a76b8;text-decoration:none}
+
+/* toast notifications bottom-right */
+.toast{position:fixed;right:18px;bottom:18px;padding:10px 14px;border-radius:4px;color:#fff;font-size:13px;box-shadow:0 6px 14px rgba(0,0,0,0.12);animation:pop 0.18s ease}
+.toast.success{background:#28a745}
+.toast.error{background:#dc3545}
+@keyframes pop{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}

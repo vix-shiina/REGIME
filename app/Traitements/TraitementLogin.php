@@ -1,0 +1,71 @@
+<?php
+namespace App\Traitements;
+
+class TraitementLogin
+{
+    protected $pdo;
+
+    public function __construct()
+    {
+        // Minimal PDO connection, expects DB 'REGIME' available on localhost
+        $dsn = 'mysql:host=127.0.0.1;dbname=REGIME;charset=utf8mb4';
+        $this->pdo = new \PDO($dsn, 'root', '', [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
+        // Do not start session here to avoid interfering with framework session handling.
+    }
+
+    public function signup(array $data)
+    {
+        $session = service('session');
+
+        // basic sanitization
+        $nom = trim($data['nom'] ?? '');
+        $prenom = trim($data['prenom'] ?? '');
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+        $genre_id = !empty($data['genre_id']) ? (int)$data['genre_id'] : null;
+
+        if (!$nom || !$prenom || !$email || !$password || !$genre_id) {
+            $session->setFlashdata('flash_error', 'Tous les champs sont requis.');
+            return redirect()->to('/SignUp');
+        }
+
+        // check email existence
+        $stmt = $this->pdo->prepare('SELECT Id FROM USER WHERE Email = ?');
+        $stmt->execute([$email]);
+        if ($stmt->fetch()){
+            $session->setFlashdata('flash_error', 'Un compte avec cet email existe déjà.');
+            return redirect()->to('/SignUp');
+        }
+
+        // Insert user (password stored as plain text per requirement)
+        $ins = $this->pdo->prepare('INSERT INTO USER (Nom,Prenom,Email,Password,GenreId) VALUES (?,?,?,?,?)');
+        $ins->execute([$nom,$prenom,$email,$password,$genre_id]);
+
+        $session->setFlashdata('flash_success', 'Inscription réussie. Vous pouvez maintenant vous connecter.');
+        return redirect()->to('/SignIn');
+    }
+
+    public function signin(array $data)
+    {
+        $session = service('session');
+
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+        if (!$email || !$password){
+            $session->setFlashdata('flash_error', 'Tous les champs sont requis.');
+            return redirect()->to('/SignIn');
+        }
+
+        $stmt = $this->pdo->prepare('SELECT Id,Nom,Prenom FROM USER WHERE Email = ? AND Password = ?');
+        $stmt->execute([$email,$password]);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if ($user){
+            $session->set('user_id', $user['Id']);
+            $session->setFlashdata('flash_success', 'Connexion réussie. Bienvenue '.$user['Prenom'].'.');
+            return redirect()->to('/dashboard');
+        }
+
+        $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');
+        return redirect()->to('/SignIn');
+    }
+}
