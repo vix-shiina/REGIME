@@ -97,7 +97,11 @@
             ?> kg
         </div>
     </div>
-
+<div class="dash-stat-card" style="border-left: 4px solid <?= $couleur_imc ?>;">
+        <div class="dash-stat-label">Ton IMC</div>
+        <div class="dash-stat-value" style="color: <?= $couleur_imc ?>;"><?= $imc ?></div>
+        <div style="font-size: 12px; font-weight: bold; color: <?= $couleur_imc ?>;"><?= $etat ?></div>
+    </div>
     <div class="dash-stat-card" style="grid-column: span 2;">
         <div class="dash-stat-label">Mettre à jour mon poids</div>
         <form action="<?= base_url('dashboard/ajouterPoids') ?>" method="post" style="display: flex; gap: 10px; margin-top: 10px;">
@@ -115,6 +119,8 @@
         <canvas id="evolutionChart" style="width: 100%; max-height: 250px;"></canvas>
     </div>
 </div>
+
+
 
                 </div>
             </div>
@@ -253,7 +259,7 @@
                 <p class="pricing-period">par semaine</p>
                 
                 <ul class="pricing-features" style="text-align: left; margin-top: 20px;">
-                    <li><strong>Catégorie :</strong> <?= $s['Categorie'] ?></li>
+                   <li><strong>Catégorie :</strong> <?= $s['Categorie'] ?></li>
                 </ul>
                 <a href="#" class="btn-ghost" style="margin-top: 20px;">Sélectionner</a>
             </div>
@@ -398,54 +404,39 @@
 
   <script src="/assets/js/templatemo-catalyst-script.js"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const canvasElement = document.getElementById('evolutionChart');
+   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvasElement = document.getElementById('evolutionChart');
+        
+        if (canvasElement) {
+            const ctx = canvasElement.getContext('2d');
             
-            if (canvasElement) {
-                const ctx = canvasElement.getContext('2d');
-                
-                // On récupère les données PHP une seule fois
-                const labels = <?= json_encode(array_column($historique, 'DateEvolution')) ?>;
-                const weights = <?= json_encode(array_column($historique, 'Poids')) ?>;
+            const labels = <?= json_encode(array_column($historique, 'DateEvolution')) ?>;
+            const weights = <?= json_encode(array_column($historique, 'Poids')) ?>;
 
+            if (labels.length > 0) {
                 new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Évolution du poids (kg)',
+                            label: 'Poids (kg)',
                             data: weights,
-                            borderColor: '#bada55', // Vert "Acid" du template
+                            borderColor: '#bada55',
                             backgroundColor: 'rgba(186, 218, 85, 0.1)',
                             fill: true,
                             tension: 0.3,
-                            borderWidth: 3,
-                            pointRadius: 5,
-                            pointBackgroundColor: '#111'
+                            borderWidth: 3
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false } // On cache la légende pour un look plus SaaS
-                        },
-                        scales: {
-                            y: { 
-                                beginAtZero: false,
-                                title: { display: true, text: 'Poids (kg)', font: { weight: 'bold' } },
-                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                            },
-                            x: { 
-                                title: { display: true, text: 'Date' },
-                                grid: { display: false }
-                            }
-                        }
+                        maintainAspectRatio: false
                     }
                 });
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
