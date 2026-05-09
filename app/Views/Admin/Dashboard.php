@@ -14,22 +14,22 @@
     </header>
 
     <section class="admin-grid">
-        <article class="admin-card">
-            <h2>Gerer les regimes</h2>
+        <a class="admin-card" href="/admin/regimes/manage">
+            <h2>Gerer les régimes</h2>
             <p>Créer, modifier et supprimer les régimes.</p>
-        </article>
-        <article class="admin-card">
+        </a>
+        <a class="admin-card" href="/admin/clients/manage">
             <h2>Gerer les Clients</h2>
             <p>Consulter et administrer les comptes utilisateurs.</p>
-        </article>
-        <article class="admin-card">
+        </a>
+        <a class="admin-card" href="/admin/sports/manage">
             <h2>Gerer les Sports</h2>
             <p>Maintenir la liste des sports et leurs attributs.</p>
-        </article>
-        <article class="admin-card">
+        </a>
+        <a class="admin-card" href="/admin/codes/manage">
             <h2>Gerer les codes</h2>
             <p>Suivre et mettre à jour les codes disponibles.</p>
-        </article>
+        </a>
     </section>
 </main>
 </body>

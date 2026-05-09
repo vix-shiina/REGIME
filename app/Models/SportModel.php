@@ -12,4 +12,26 @@ class SportModel extends Model {
                     ->join('TypeDeSport', 'TypeDeSport.Id = SPORT.TypeDeSportId')
                     ->findAll();
     }
+
+    public function createSport($nom, $typeId, $efficacite) {
+        $data = [
+            'SportNom' => $nom,
+            'TypeDeSportId' => $typeId,
+            'EfficacitePoids' => $efficacite
+        ];
+        return $this->insert($data);
+    }
+
+    public function updateSport($id, $nom, $typeId, $efficacite) {
+        $data = [
+            'SportNom' => $nom,
+            'TypeDeSportId' => $typeId,
+            'EfficacitePoids' => $efficacite
+        ];
+        return $this->update($id, $data);
+    }
+
+    public function deleteSport($id) {
+        return $this->delete($id);
+    }
 }

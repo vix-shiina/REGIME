@@ -27,4 +27,24 @@ $routes->get('/myhome', 'Myhome::index');
 $routes->get('/profil', 'Profil::index');
 $routes->post('/profil', 'Profil::update');
 $routes->get('/logout', 'Auth::logout');
+
+// Pages de gestion (vues) pour l'admin
+$routes->get('/admin/regimes/manage', static function () {
+	echo view('Admin/GererRegime');
+});
+$routes->get('/admin/sports/manage', static function () {
+	echo view('Admin/GererSport');
+});
+$routes->get('/admin/clients/manage', static function () {
+	echo view('Admin/GererClient');
+});
+$routes->get('/admin/codes/manage', static function () {
+	echo view('Admin/GererCode');
+});
+//cote admin
+$routes->get('/admin/regimes', 'AdminController::regimes');
+$routes->post('/admin/regimes/create', 'AdminController::createRegime');
+$routes->post('/admin/sports/create', 'AdminController::createSport');
+$routes->post('/admin/regimes/delete/(:num)', 'AdminController::deleteRegime/$1');
+$routes->post('/admin/sports/delete/(:num)', 'AdminController::deleteSport/$1');
 ?>
