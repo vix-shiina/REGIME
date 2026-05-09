@@ -22,7 +22,9 @@
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="/assets/css/templatemo-catalyst-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
     <!-- ===== NAVIGATION ===== -->
@@ -70,7 +72,7 @@
             </div>
 
             <!-- Dashboard Mockup -->
-            <div class="hero-dashboard reveal">
+            <div class="hero-dashboard">
                 <div class="dashboard-frame">
                     <div class="dashboard-toolbar">
                         <div class="dashboard-dots">
@@ -84,87 +86,36 @@
                         </div>
                         <div style="width: 50px;"></div>
                     </div>
-                    <div class="dashboard-body">
-                        <div class="dash-stat-card">
-                            <div class="dash-stat-label">Total Revenue</div>
-                            <div class="dash-stat-value">$2.4M</div>
-                            <div class="dash-stat-change">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                +18.2%
-                            </div>
-                        </div>
-                        <div class="dash-stat-card">
-                            <div class="dash-stat-label">Active Users</div>
-                            <div class="dash-stat-value">48,291</div>
-                            <div class="dash-stat-change">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                +7.4%
-                            </div>
-                        </div>
-                        <div class="dash-stat-card">
-                            <div class="dash-stat-label">Avg. Query Time</div>
-                            <div class="dash-stat-value">42ms</div>
-                            <div class="dash-stat-change">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                -23.5%
-                            </div>
-                        </div>
-                        <div class="dashboard-table-area">
-                            <div class="dash-table-header">
-                                <span>Recent Pipelines</span>
-                                <span class="dash-filter">All teams ▾</span>
-                            </div>
-                            <div class="dash-table">
-                                <div class="dash-table-row head">
-                                    <div class="dash-cell">Pipeline</div>
-                                    <div class="dash-cell">Events / hr</div>
-                                    <div class="dash-cell">Latency</div>
-                                    <div class="dash-cell">Uptime</div>
-                                    <div class="dash-cell">Status</div>
-                                </div>
-                                <div class="dash-table-row">
-                                    <div class="dash-cell dash-cell-name">
-                                        <span class="dash-cell-icon" style="background: #DCFCE7; color: #166534;">P1</span>
-                                        Checkout Funnel
-                                    </div>
-                                    <div class="dash-cell">1.2M</div>
-                                    <div class="dash-cell">34ms</div>
-                                    <div class="dash-cell">99.98%</div>
-                                    <div class="dash-cell"><span class="dash-status active">Active</span></div>
-                                </div>
-                                <div class="dash-table-row">
-                                    <div class="dash-cell dash-cell-name">
-                                        <span class="dash-cell-icon" style="background: #FEF3C7; color: #92400E;">P2</span>
-                                        User Onboarding
-                                    </div>
-                                    <div class="dash-cell">847K</div>
-                                    <div class="dash-cell">52ms</div>
-                                    <div class="dash-cell">99.91%</div>
-                                    <div class="dash-cell"><span class="dash-status pending">Pending</span></div>
-                                </div>
-                                <div class="dash-table-row">
-                                    <div class="dash-cell dash-cell-name">
-                                        <span class="dash-cell-icon" style="background: var(--surface); color: var(--text-muted);">P3</span>
-                                        Revenue Tracker
-                                    </div>
-                                    <div class="dash-cell">2.1M</div>
-                                    <div class="dash-cell">28ms</div>
-                                    <div class="dash-cell">99.99%</div>
-                                    <div class="dash-cell"><span class="dash-status active">Active</span></div>
-                                </div>
-                                <div class="dash-table-row">
-                                    <div class="dash-cell dash-cell-name">
-                                        <span class="dash-cell-icon" style="background: #E0E7FF; color: #3730A3;">P4</span>
-                                        A/B Experiments
-                                    </div>
-                                    <div class="dash-cell">423K</div>
-                                    <div class="dash-cell">61ms</div>
-                                    <div class="dash-cell">99.87%</div>
-                                    <div class="dash-cell"><span class="dash-status draft">Draft</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+<div class="dashboard-body">
+    <div class="dash-stat-card">
+        <div class="dash-stat-label">Poids Actuel</div>
+        <div class="dash-stat-value">
+            <?php 
+                // Affiche le dernier poids enregistré ou "0"
+                echo !empty($historique) ? end($historique)['Poids'] : '0'; 
+            ?> kg
+        </div>
+    </div>
+
+    <div class="dash-stat-card" style="grid-column: span 2;">
+        <div class="dash-stat-label">Mettre à jour mon poids</div>
+        <form action="<?= base_url('dashboard/ajouterPoids') ?>" method="post" style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="hidden" name="userId" value="<?= $userId ?>">
+            <input type="number" step="0.1" name="poids" placeholder="Ex: 75.5" 
+                   style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+            <button type="submit" class="btn-acid" style="padding: 8px 15px; font-size: 14px;">OK</button>
+        </form>
+    </div>
+
+    <div class="dashboard-table-area" style="padding: 20px;">
+        <div class="dash-table-header">
+            <span>Évolution de ma courbe</span>
+        </div>
+        <canvas id="evolutionChart" style="width: 100%; max-height: 250px;"></canvas>
+    </div>
+</div>
+
                 </div>
             </div>
         </div>
@@ -255,122 +206,61 @@
         </div>
     </section>
 
-    <!-- ===== SECTION 4: PRICING ===== -->
-    <section class="pricing" id="pricing">
-        <div class="container">
-            <div class="section-header reveal">
-                <p class="section-tag">Pricing</p>
-                <h2 class="section-title">Simple, transparent pricing</h2>
-            </div>
-            <div class="toggle-wrap reveal">
-                <div class="toggle-container">
-                    <button class="toggle-btn" data-plan="monthly" id="toggleMonthly">Monthly</button>
-                    <button class="toggle-btn active" data-plan="yearly" id="toggleYearly">Yearly</button>
-                </div>
-                <span class="toggle-save visible" id="toggleSave">Save 25%</span>
-            </div>
-            <div class="pricing-grid">
-                <!-- Starter -->
-                <div class="card pricing-card reveal">
-                    <div class="pricing-plan-name">Starter</div>
-                    <div class="pricing-plan-desc">For small teams getting started</div>
-                    <div class="pricing-amount">
-                        <span class="pricing-currency">$</span>
-                        <span class="pricing-value" data-monthly="30" data-yearly="22">22</span>
-                    </div>
-                    <p class="pricing-period">per seat / month</p>
-                    <p class="pricing-billed yearly-active" data-monthly="Billed monthly" data-yearly="$264 billed annually">$264 billed annually</p>
-                    <a href="#" class="btn-ghost">Get Started</a>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Up to 5 team members
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            1 billion events / month
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            7-day data retention
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Community support
-                        </li>
-                    </ul>
-                </div>
-                <!-- Pro -->
-                <div class="card pricing-card featured reveal">
-                    <div class="pricing-plan-name">Pro</div>
-                    <div class="pricing-plan-desc">For scaling data teams</div>
-                    <div class="pricing-amount">
-                        <span class="pricing-currency">$</span>
-                        <span class="pricing-value" data-monthly="100" data-yearly="75">75</span>
-                    </div>
-                    <p class="pricing-period">per seat / month</p>
-                    <p class="pricing-billed yearly-active" data-monthly="Billed monthly" data-yearly="$900 billed annually">$900 billed annually</p>
-                    <a href="#" class="btn-acid">Get Started</a>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Unlimited team members
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            50 billion events / month
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Unlimited data retention
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Priority support + SLA
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            SSO &amp; audit logs
-                        </li>
-                    </ul>
-                </div>
-                <!-- Enterprise -->
-                <div class="card pricing-card reveal">
-                    <div class="pricing-plan-name">Enterprise</div>
-                    <div class="pricing-plan-desc">For mission-critical deployments</div>
-                    <div class="pricing-amount">
-                        <span class="pricing-currency">$</span>
-                        <span class="pricing-value" data-monthly="500" data-yearly="375">375</span>
-                    </div>
-                    <p class="pricing-period">starts from / month</p>
-                    <p class="pricing-billed yearly-active" data-monthly="Billed monthly" data-yearly="$4,500 billed annually">$4,500 billed annually</p>
-                    <a href="#" class="btn-ghost">Contact Sales</a>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Everything in Pro
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Dedicated infrastructure
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Custom integrations
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            24/7 dedicated support
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 18 18" fill="none"><path d="M4 9l3.5 3.5L14 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            99.99% SLA guarantee
-                        </li>
-                    </ul>
-                </div>
-            </div>
+ <section class="pricing" id="pricing">
+    <div class="container">
+        <div class="section-header">
+            <p class="section-tag">Programmes</p>
+            <h2 class="section-title">Régimes suggérés pour vous</h2>
         </div>
-    </section>
+        
+        <div class="pricing-grid">
+            <?php foreach ($regimes as $r): ?>
+            <div class="card pricing-card">
+                <div class="pricing-plan-name"><?= $r['RegimeNom'] ?></div>
+                <div class="pricing-amount">
+                    <span class="pricing-currency">Ar</span>
+                    <span class="pricing-value"><?= number_format($r['PrixJournaliere'], 0, '.', ' ') ?></span>
+                </div>
+                <p class="pricing-period">par semaine</p>
+                
+                <ul class="pricing-features" style="text-align: left; margin-top: 20px;">
+                    <li><strong>Viande :</strong> <?= $r['Viande'] ?>%</li>
+                    <li><strong>Poisson :</strong> <?= $r['Poisson'] ?>%</li>
+                    <li><strong>Volaille :</strong> <?= $r['Volailles'] ?>%</li>
+                </ul>
+                <a href="#" class="btn-acid" style="margin-top: 20px;">Choisir</a>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<section class="sports" id="sports" style="padding: 60px 0;">
+    <div class="container">
+        <div class="section-header">
+            <p class="section-tag">Activités</p>
+            <h2 class="section-title">Sports recommandés</h2>
+        </div>
+        
+        <div class="pricing-grid">
+            <?php foreach ($sports as $s): ?>
+            <div class="card pricing-card">
+                <div class="pricing-plan-name"><?= $s['SportNom'] ?></div>
+                <div class="pricing-amount">
+                    <span class="pricing-value"><?= $s['EfficacitePoids'] ?></span>
+                    <span class="pricing-currency">kg</span>
+                </div>
+                <p class="pricing-period">par semaine</p>
+                
+                <ul class="pricing-features" style="text-align: left; margin-top: 20px;">
+                    <li><strong>Catégorie :</strong> <?= $s['Categorie'] ?></li>
+                </ul>
+                <a href="#" class="btn-ghost" style="margin-top: 20px;">Sélectionner</a>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
 
     <!-- ===== SECTION 5: FAQ ===== -->
     <section class="faq" id="faq">
@@ -506,8 +396,56 @@
         </div>
     </footer>
 
-    <!-- Template JS -->
-    <script src="/assets/js/templatemo-catalyst-script.js"></script>
+  <script src="/assets/js/templatemo-catalyst-script.js"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvasElement = document.getElementById('evolutionChart');
+            
+            if (canvasElement) {
+                const ctx = canvasElement.getContext('2d');
+                
+                // On récupère les données PHP une seule fois
+                const labels = <?= json_encode(array_column($historique, 'DateEvolution')) ?>;
+                const weights = <?= json_encode(array_column($historique, 'Poids')) ?>;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Évolution du poids (kg)',
+                            data: weights,
+                            borderColor: '#bada55', // Vert "Acid" du template
+                            backgroundColor: 'rgba(186, 218, 85, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#111'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false } // On cache la légende pour un look plus SaaS
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: false,
+                                title: { display: true, text: 'Poids (kg)', font: { weight: 'bold' } },
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            },
+                            x: { 
+                                title: { display: true, text: 'Date' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
