@@ -1,11 +1,13 @@
 // header.js — contact phone ringing behavior
 document.addEventListener('DOMContentLoaded', function(){
     var contactBtn = document.getElementById('contactBtn');
-    if (!contactBtn) return;
+    var promoLine = document.querySelector('.has-promo-header .announcement-line');
+    if (!contactBtn && !promoLine) return;
 
     var audioCtx = null;
     var oscillators = [];
     var ringing = false;
+    var tickerId = null;
 
     function startRinging(){
         if (ringing) return;
@@ -47,8 +49,4 @@ document.addEventListener('DOMContentLoaded', function(){
         oscillators = [];
     }
 
-    contactBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        startRinging();
-    });
 });
