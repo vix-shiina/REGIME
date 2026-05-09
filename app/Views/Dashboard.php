@@ -221,7 +221,7 @@
                     <span class="pricing-currency">Ar</span>
                     <span class="pricing-value"><?= number_format($r['PrixJournaliere'], 0, '.', ' ') ?></span>
                 </div>
-                <p class="pricing-period">par jour</p>
+                <p class="pricing-period">par semaine</p>
                 
                 <ul class="pricing-features" style="text-align: left; margin-top: 20px;">
                     <li><strong>Viande :</strong> <?= $r['Viande'] ?>%</li>
@@ -229,6 +229,33 @@
                     <li><strong>Volaille :</strong> <?= $r['Volailles'] ?>%</li>
                 </ul>
                 <a href="#" class="btn-acid" style="margin-top: 20px;">Choisir</a>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<section class="sports" id="sports" style="padding: 60px 0;">
+    <div class="container">
+        <div class="section-header">
+            <p class="section-tag">Activités</p>
+            <h2 class="section-title">Sports recommandés</h2>
+        </div>
+        
+        <div class="pricing-grid">
+            <?php foreach ($sports as $s): ?>
+            <div class="card pricing-card">
+                <div class="pricing-plan-name"><?= $s['SportNom'] ?></div>
+                <div class="pricing-amount">
+                    <span class="pricing-value"><?= $s['EfficacitePoids'] ?></span>
+                    <span class="pricing-currency">kg</span>
+                </div>
+                <p class="pricing-period">par semaine</p>
+                
+                <ul class="pricing-features" style="text-align: left; margin-top: 20px;">
+                    <li><strong>Catégorie :</strong> <?= $s['Categorie'] ?></li>
+                </ul>
+                <a href="#" class="btn-ghost" style="margin-top: 20px;">Sélectionner</a>
             </div>
             <?php endforeach; ?>
         </div>
@@ -369,34 +396,56 @@
         </div>
     </footer>
 
-    <!-- Template JS -->
-    <script src="/assets/js/templatemo-catalyst-script.js"></script>
-<script>
-        const canvasElement = document.getElementById('evolutionChart');
-        if (canvasElement) {
-            const ctx = canvasElement.getContext('2d');
-            const labels = <?= json_encode(array_column($historique, 'DateEvolution')) ?>;
-            const weights = <?= json_encode(array_column($historique, 'Poids')) ?>;
+  <script src="/assets/js/templatemo-catalyst-script.js"></script>
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Poids (kg)',
-                        data: weights,
-                        borderColor: '#bada55',
-                        backgroundColor: 'rgba(186, 218, 85, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: false } }
-                }
-            });
-        }
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvasElement = document.getElementById('evolutionChart');
+            
+            if (canvasElement) {
+                const ctx = canvasElement.getContext('2d');
+                
+                // On récupère les données PHP une seule fois
+                const labels = <?= json_encode(array_column($historique, 'DateEvolution')) ?>;
+                const weights = <?= json_encode(array_column($historique, 'Poids')) ?>;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Évolution du poids (kg)',
+                            data: weights,
+                            borderColor: '#bada55', // Vert "Acid" du template
+                            backgroundColor: 'rgba(186, 218, 85, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#111'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false } // On cache la légende pour un look plus SaaS
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: false,
+                                title: { display: true, text: 'Poids (kg)', font: { weight: 'bold' } },
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            },
+                            x: { 
+                                title: { display: true, text: 'Date' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
