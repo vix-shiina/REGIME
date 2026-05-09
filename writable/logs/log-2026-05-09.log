@@ -1,0 +1,12 @@
+CRITICAL - 2026-05-09 14:10:41 --> PDOException: SQLSTATE[HY000] [2002] Connection refused
+[Method: POST, Route: SignIn]
+in APPPATH/Traitements/TraitementLogin.php on line 12.
+ 1 APPPATH/Traitements/TraitementLogin.php(12): PDO->__construct('mysql:host=127.0.0.1;dbname=REGIME;charset=utf8mb4', 'root', Object(SensitiveParameterValue), [...])
+ 2 APPPATH/Controllers/Auth.php(24): App\Traitements\TraitementLogin->__construct()
+ 3 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\Auth->signinPost()
+ 4 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Auth))
+ 5 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ 9 SYSTEMPATH/rewrite.php(44): require_once('/home/sariaka/S4/SI/REGIME/public/index.php')
