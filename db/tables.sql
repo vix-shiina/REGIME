@@ -102,3 +102,10 @@ CREATE TABLE Code(
     Code VARCHAR(50) NOT NULL,
     Valeur FLOAT
 );
+
+CREATE TABLE UserSolde(
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    Solde FLOAT,
+    FOREIGN KEY (UserId) REFERENCES USER(Id)
+);

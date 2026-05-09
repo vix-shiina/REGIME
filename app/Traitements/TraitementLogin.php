@@ -7,17 +7,14 @@ class TraitementLogin
 
     public function __construct()
     {
-        // Minimal PDO connection, expects DB 'REGIME' available on localhost
         $dsn = 'mysql:host=127.0.0.1;dbname=REGIME;charset=utf8mb4';
         $this->pdo = new \PDO($dsn, 'root', '', [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
-        // Do not start session here to avoid interfering with framework session handling.
     }
 
     public function signup(array $data)
     {
         $session = service('session');
 
-        // basic sanitization
         $nom = trim($data['nom'] ?? '');
         $prenom = trim($data['prenom'] ?? '');
         $email = trim($data['email'] ?? '');
@@ -29,7 +26,6 @@ class TraitementLogin
             return redirect()->to('/SignUp');
         }
 
-        // check email existence
         $stmt = $this->pdo->prepare('SELECT Id FROM USER WHERE Email = ?');
         $stmt->execute([$email]);
         if ($stmt->fetch()){
@@ -37,7 +33,6 @@ class TraitementLogin
             return redirect()->to('/SignUp');
         }
 
-        // Insert user (password stored as plain text per requirement)
         $ins = $this->pdo->prepare('INSERT INTO USER (Nom,Prenom,Email,Password,GenreId) VALUES (?,?,?,?,?)');
         $ins->execute([$nom,$prenom,$email,$password,$genre_id]);
 
@@ -61,8 +56,9 @@ class TraitementLogin
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
         if ($user){
             $session->set('user_id', $user['Id']);
+            $session->set('user_name', $user['Prenom']);
             $session->setFlashdata('flash_success', 'Connexion réussie. Bienvenue '.$user['Prenom'].'.');
-            return redirect()->to('/dashboard');
+            return redirect()->to('/myhome');
         }
 
         $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');

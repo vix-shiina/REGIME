@@ -1,7 +1,6 @@
 // header.js — contact phone ringing behavior
 document.addEventListener('DOMContentLoaded', function(){
     var contactBtn = document.getElementById('contactBtn');
-    var ringDot = document.getElementById('ringDot');
     if (!contactBtn) return;
 
     var audioCtx = null;
@@ -11,8 +10,6 @@ document.addEventListener('DOMContentLoaded', function(){
     function startRinging(){
         if (ringing) return;
         ringing = true;
-        ringDot.style.opacity = '1';
-        ringDot.classList.add('ringing');
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             // pattern: 3 short rings
@@ -43,8 +40,6 @@ document.addEventListener('DOMContentLoaded', function(){
     function stopRinging(){
         if (!ringing) return;
         ringing = false;
-        ringDot.classList.remove('ringing');
-        ringDot.style.opacity = '0';
         if (audioCtx){
             try { audioCtx.close(); } catch(e){}
             audioCtx = null;

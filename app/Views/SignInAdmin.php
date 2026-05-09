@@ -26,15 +26,7 @@
     </div>
 </div>
 
-<?php
-    $flashSuccess = session()->getFlashdata('flash_success');
-    $flashError = session()->getFlashdata('flash_error');
-if (!empty($flashSuccess)): ?>
-    <div class="toast success"><?php echo htmlspecialchars($flashSuccess); ?></div>
-<?php endif; ?>
-<?php if (!empty($flashError)): ?>
-    <div class="toast error"><?php echo htmlspecialchars($flashError); ?></div>
-<?php endif; ?>
+<?php echo view('partials/Flash'); ?>
 
 </body>
 </html>

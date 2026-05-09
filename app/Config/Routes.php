@@ -18,5 +18,8 @@ $routes->get('/SignIn', 'Auth::signin');
 $routes->post('/SignIn', 'Auth::signinPost');
 $routes->get('/SignUp', 'Auth::signup');
 $routes->post('/SignUp', 'Auth::signupPost');
+$routes->get('/myhome', 'Myhome::index');
+$routes->get('/profil', 'Profil::index');
+$routes->post('/profil', 'Profil::update');
 $routes->get('/logout', 'Auth::logout');
 ?>

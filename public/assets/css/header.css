@@ -1,22 +1,37 @@
 /* Header component styles */
 .site-header{position:fixed;top:0;left:0;right:0;height:56px;background:#ffffff;display:flex;align-items:center;z-index:1100;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
-.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 12px;width:100%}
+.header-inner{max-width:100%;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 8px;width:100%}
+.brand-link{display:flex;align-items:center;gap:8px;text-decoration:none}
 .brand .brand-logo{height:36px;object-fit:contain}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-0.03em;color:#00c800;line-height:1}
 .main-nav{display:flex;gap:14px;align-items:center}
 .nav-item{display:flex;gap:8px;align-items:center;color:#0b1220;text-decoration:none;font-size:13px;padding:6px 8px;border-radius:6px;opacity:0.95}
 .nav-item img.icon{display:inline-block;width:20px;height:20px}
 .nav-item:hover{background:rgba(11,18,32,0.04)}
 .header-actions{display:flex;align-items:center;gap:10px}
+.user-balance{display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(11,18,32,0.08);border-radius:999px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.04);font-size:13px;color:#0b1220;white-space:nowrap}
+.balance-label{opacity:.7}
+.balance-value{font-weight:700}
 .contact-btn{background:transparent;border:1px solid rgba(11,18,32,0.06);color:#0b1220;padding:6px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer}
 .contact-btn:focus{outline:2px solid rgba(11,18,32,0.12)}
 .contact-text{display:inline-block;font-size:13px}
-.ring-dot{width:8px;height:8px;border-radius:50%;background:#0b84ff;margin-left:6px;opacity:0;transform:scale(.6);transition:opacity .15s,transform .15s}
+.ring-dot{width:8px;height:8px;border-radius:50%;background:#0b84ff;margin-left:6px;opacity:1;transform:scale(1);animation:ringPulse .9s infinite}
 .ringing{animation:ringPulse .9s infinite}
 @keyframes ringPulse{0%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
 .account-link{display:inline-flex;padding:6px;border-radius:8px;background:transparent}
 .contact-btn{background-color: rgb(0, 236, 0);}
 /* icon common */
 .icon{width:20px;height:20px;display:inline-block;object-fit:contain}
+
+@media (max-width: 900px){
+	.header-inner{padding:0 6px}
+	.balance-label{display:none}
+}
+
+@media (max-width: 560px){
+	.header-inner{padding:0 4px}
+	.brand-name{font-size:14px}
+}
 
 /* push page content below fixed header */
 body{padding-top:56px}
