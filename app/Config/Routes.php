@@ -7,7 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 $routes->get('/dashboard', 'Dashboard::index');
-$routes->get('/Dashboard', 'Dashboard::index');
+// $routes->get('/Dashboard', 'Dashboard::index');
 $routes->get('/admin', 'Auth::adminLogin');
 $routes->post('/admin', 'Auth::adminLoginPost');
 $routes->get('/Admin', static function () {
@@ -43,3 +43,4 @@ $routes->post('/SignIn', 'Auth::signinPost');
 $routes->get('/SignUp', 'Auth::signup');
 $routes->post('/SignUp', 'Auth::signupPost');
 $routes->get('/logout', 'Auth::logout');
+?>
