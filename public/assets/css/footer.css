@@ -1,0 +1,6 @@
+/* Footer component */
+.site-footer{position:fixed;left:0;right:0;bottom:0;height:56px;background:#fbfcfe;color:#e5e7eb;display:flex;align-items:center;justify-content:center;z-index:1100;box-shadow:0 -6px 18px rgba(2,6,23,0.5);font-size:13px}
+.footer-inner{max-width:1200px;padding:10px 16px;width:100%; color: black;}
+
+/* ensure main content isn't hidden behind footer */
+body{padding-bottom:72px}
