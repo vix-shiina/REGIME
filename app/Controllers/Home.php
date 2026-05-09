@@ -8,4 +8,9 @@ class Home extends BaseController
     {
         return view('SignIn.php');
     }
+
+    public function dashboard(): string
+    {
+        return view('Dashboard.php');
+    }
 }
