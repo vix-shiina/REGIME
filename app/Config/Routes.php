@@ -43,3 +43,4 @@ $routes->post('/SignIn', 'Auth::signinPost');
 $routes->get('/SignUp', 'Auth::signup');
 $routes->post('/SignUp', 'Auth::signupPost');
 $routes->get('/logout', 'Auth::logout');
+?>
