@@ -13,9 +13,19 @@ class RegimeModel extends Model
     
     public function getRegimesWithDetails()
     {
-        return $this->select('REGIME.*, CompoRegime.Viande, CompoRegime.Poisson, CompoRegime.Volailles')
-                    ->join('CompoRegime', 'CompoRegime.RegimeId = REGIME.Id')
+        return $this->select('REGIME.*, CompoRegime.Viande, CompoRegime.Poisson, CompoRegime.Volailles, TypeDeRegime.TypeDeRegime AS TypeNom')
+                    ->join('CompoRegime', 'CompoRegime.RegimeId = REGIME.Id', 'left')
+                    ->join('TypeDeRegime', 'TypeDeRegime.Id = REGIME.TypeDeRegimeId', 'left')
                     ->findAll();
+    }
+
+    public function getRegimeWithDetails($id)
+    {
+        return $this->select('REGIME.*, CompoRegime.Viande, CompoRegime.Poisson, CompoRegime.Volailles, TypeDeRegime.TypeDeRegime AS TypeNom')
+                    ->join('CompoRegime', 'CompoRegime.RegimeId = REGIME.Id', 'left')
+                    ->join('TypeDeRegime', 'TypeDeRegime.Id = REGIME.TypeDeRegimeId', 'left')
+                    ->where('REGIME.Id', $id)
+                    ->first();
     }
 
     public function createRegime($nom , $typeId, $prix, $efficacite, $viande, $poisson, $volailles)
@@ -56,5 +66,13 @@ class RegimeModel extends Model
     {
         $this->db->table('CompoRegime')->where('RegimeId', $id)->delete();
         return $this->delete($id);
+    }
+
+    public function getTypeDeRegimeOptions()
+    {
+        return $this->db->table('TypeDeRegime')
+            ->select('Id, TypeDeRegime')
+            ->get()
+            ->getResultArray();
     }
 }

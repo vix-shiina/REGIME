@@ -32,22 +32,25 @@ $routes->post('/profil/solde/check', 'Profil::checkSoldeCode');
 $routes->get('/logout', 'Auth::logout');
 
 // Pages de gestion (vues) pour l'admin
-$routes->get('/admin/regimes/manage', static function () {
-	echo view('Admin/GererRegime');
-});
-$routes->get('/admin/sports/manage', static function () {
-	echo view('Admin/GererSport');
-});
-$routes->get('/admin/clients/manage', static function () {
-	echo view('Admin/GererClient');
-});
-$routes->get('/admin/codes/manage', static function () {
-	echo view('Admin/GererCode');
-});
+$routes->get('/admin/regimes/manage', 'AdminController::manageRegimes');
+$routes->get('/admin/sports/manage', 'AdminController::manageSports');
+$routes->get('/admin/clients/manage', 'AdminController::manageClients');
+$routes->get('/admin/codes/manage', 'AdminController::manageCodes');
 //cote admin
-$routes->get('/admin/regimes', 'AdminController::regimes');
+$routes->get('/admin/regimes', 'AdminController::manageRegimes');
+$routes->get('/admin/sports', 'AdminController::manageSports');
+$routes->get('/admin/clients', 'AdminController::manageClients');
+$routes->get('/admin/codes', 'AdminController::manageCodes');
 $routes->post('/admin/regimes/create', 'AdminController::createRegime');
 $routes->post('/admin/sports/create', 'AdminController::createSport');
+$routes->post('/admin/codes/create', 'AdminController::createCode');
+$routes->get('/admin/sports/edit/(:num)', 'AdminController::editSport/$1');
+$routes->post('/admin/sports/update/(:num)', 'AdminController::updateSport/$1');
+$routes->get('/admin/codes/edit/(:num)', 'AdminController::editCode/$1');
+$routes->post('/admin/codes/update/(:num)', 'AdminController::updateCode/$1');
 $routes->post('/admin/regimes/delete/(:num)', 'AdminController::deleteRegime/$1');
 $routes->post('/admin/sports/delete/(:num)', 'AdminController::deleteSport/$1');
+$routes->post('/admin/codes/delete/(:num)', 'AdminController::deleteCode/$1');
+$routes->get('/admin/regimes/edit/(:num)', 'AdminController::editRegime/$1');
+$routes->post('/admin/regimes/update/(:num)', 'AdminController::updateRegime/$1');
 ?>
