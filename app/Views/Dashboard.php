@@ -247,7 +247,7 @@
             <div class="card pricing-card">
                 <div class="pricing-plan-name"><?= $s['SportNom'] ?></div>
                 <div class="pricing-amount">
-                    <span class="pricing-value"><?= $s['EfficacitePoids'] ?></span>
+                    <span class="pricing-value"><?= $s['EfficacitePoidsParSceance'] ?></span>
                     <span class="pricing-currency">kg</span>
                 </div>
                 <p class="pricing-period">par semaine</p>
