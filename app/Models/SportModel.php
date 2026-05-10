@@ -13,6 +13,14 @@ class SportModel extends Model {
                     ->findAll();
     }
 
+    public function getTypeDeSportOptions()
+    {
+        return $this->db->table('TypeDeSport')
+            ->select('Id, TypeDeSport AS TypeNom')
+            ->get()
+            ->getResultArray();
+    }
+
     public function createSport($nom, $typeId, $efficacite) {
         $data = [
             'SportNom' => $nom,
