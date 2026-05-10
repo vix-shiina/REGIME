@@ -3,6 +3,15 @@
 
 <?php
 $session = session();
+$uri = service('uri');
+$currentPath = trim($uri->getPath(), '/');
+$navMap = [
+    'myhome' => 'myhome',
+    'dashboard' => 'dashboard',
+    'profil' => 'profil',
+];
+$activeNav = $navMap[$currentPath] ?? (str_starts_with($currentPath, 'profil') ? 'profil' : (str_starts_with($currentPath, 'dashboard') ? 'dashboard' : 'myhome'));
+$activeIndex = $activeNav === 'dashboard' ? 0 : ($activeNav === 'myhome' ? 1 : 2);
 $userBalance = null;
 
 if (!empty($session->get('user_id'))) {
@@ -32,17 +41,16 @@ if (!empty($session->get('user_id'))) {
             </a>
         </div>
 
-        <nav class="main-nav" aria-label="Main navigation">
-            <a class="nav-item" href="<?= site_url('myhome') ?>">
-            <img src="/assets/images/icons/home.png" alt="Accueil" class="icon">
-                <span>Accueil</span>
-            </a>
-            <a class="nav-item" href="<?= site_url('dashboard') ?>">
-
-            <img src="/assets/images/icons/dashboard.png" alt="Dashboard" class="icon">
+        <nav class="main-nav" aria-label="Main navigation" style="--nav-index: <?= (int) $activeIndex ?>;">
+            <a class="nav-item <?= $activeNav === 'dashboard' ? 'is-active' : '' ?>" href="<?= site_url('dashboard') ?>" data-nav-key="dashboard">
+                <img src="/assets/images/icons/dashboard.png" alt="Dashboard" class="icon">
                 <span>Dashboard</span>
             </a>
-            <a class="nav-item account-link" href="<?= site_url('profil') ?>" aria-label="Mon compte">
+            <a class="nav-item <?= $activeNav === 'myhome' ? 'is-active' : '' ?>" href="<?= site_url('myhome') ?>" data-nav-key="myhome">
+                <img src="/assets/images/icons/home.png" alt="Accueil" class="icon">
+                <span>Accueil</span>
+            </a>
+            <a class="nav-item account-link <?= $activeNav === 'profil' ? 'is-active' : '' ?>" href="<?= site_url('profil') ?>" aria-label="Mon compte" data-nav-key="profil">
                 <img src="/assets/images/icons/user.png" alt="Mon compte" class="icon">
                 <span>Mon compte</span>
             </a>

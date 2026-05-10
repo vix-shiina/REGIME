@@ -72,10 +72,26 @@ class TraitementProfil
         }
 
         $stmt = $this->pdo->prepare(
-            'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif, ac.Id AS ApplicationId
+            'SELECT ac.Id
+             FROM ApplicationCode ac
+             INNER JOIN Code c ON c.Id = ac.CodeId
+               WHERE TRIM(c.Code) = ?
+             LIMIT 1'
+        );
+        $stmt->execute([$codeValue]);
+        $application = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($application) {
+            return [
+                'success' => false,
+                'message' => 'Ce code a déjà été utilisé.',
+            ];
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif
              FROM Code c
-             LEFT JOIN ApplicationCode ac ON ac.CodeId = c.Id
-               WHERE UPPER(TRIM(c.Code)) = UPPER(TRIM(?))
+               WHERE TRIM(c.Code) = ?
              LIMIT 1'
         );
         $stmt->execute([$codeValue]);
@@ -84,14 +100,7 @@ class TraitementProfil
         if (!$code) {
             return [
                 'success' => false,
-                'message' => 'Code introuvable.',
-            ];
-        }
-
-        if (!empty($code['ApplicationId'])) {
-            return [
-                'success' => false,
-                'message' => 'Ce code a déjà été utilisé.',
+                'message' => 'Code invalide.',
             ];
         }
 
@@ -145,10 +154,28 @@ class TraitementProfil
             $this->pdo->beginTransaction();
 
             $stmt = $this->pdo->prepare(
-                'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif, ac.Id AS ApplicationId
+                'SELECT ac.Id
+                 FROM ApplicationCode ac
+                 INNER JOIN Code c ON c.Id = ac.CodeId
+                  WHERE TRIM(c.Code) = ?
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $stmt->execute([$codeValue]);
+            $application = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($application) {
+                $this->pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Ce code a déjà été utilisé.',
+                ];
+            }
+
+            $stmt = $this->pdo->prepare(
+                'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif
                  FROM Code c
-                 LEFT JOIN ApplicationCode ac ON ac.CodeId = c.Id
-                  WHERE UPPER(TRIM(c.Code)) = UPPER(TRIM(?))
+                  WHERE TRIM(c.Code) = ?
                  LIMIT 1
                  FOR UPDATE'
             );
@@ -159,17 +186,39 @@ class TraitementProfil
                 $this->pdo->rollBack();
                 return [
                     'success' => false,
-                    'message' => 'Code introuvable.',
+                    'message' => 'Code invalide.',
                 ];
             }
 
-            $check = $this->checkCodeForSolde($codeValue);
-            if (empty($check['success'])) {
+            if ((int) ($code['Actif'] ?? 0) !== 1) {
                 $this->pdo->rollBack();
-                return $check;
+                return [
+                    'success' => false,
+                    'message' => 'Ce code n’est plus valide.',
+                ];
             }
 
-            $amount = (float) $check['amount'];
+            if (!empty($code['DateExpiration'])) {
+                $today = new \DateTimeImmutable('today');
+                $expiry = new \DateTimeImmutable($code['DateExpiration']);
+
+                if ($expiry < $today) {
+                    $this->pdo->rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Ce code est expiré.',
+                    ];
+                }
+            }
+
+            $amount = round((float) ($code['Valeur'] ?? 0), 2);
+            if ($amount <= 0) {
+                $this->pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Ce code ne contient aucun montant.',
+                ];
+            }
 
             $stmt = $this->pdo->prepare('SELECT Id, Solde FROM UserSolde WHERE UserId = ? LIMIT 1 FOR UPDATE');
             $stmt->execute([$userId]);
