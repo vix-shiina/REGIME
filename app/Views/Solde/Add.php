@@ -52,8 +52,6 @@
                         <button class="btn btn-primary" type="submit">Valider le code</button>
                     </div>
                 </form>
-
-                <p style="margin-top:14px;color:#667085;">Le code est vérifié en base, doit être actif, non expiré et non déjà utilisé.</p>
             </article>
         </section>
     </section>
