@@ -5,16 +5,16 @@ VALUES
 ('Utilisateur'),
 ('Admin');
 
-INSERT INTO USER (Nom, Prenom, Email, Password, UserTypeId, GenreId)
-VALUES
-('Admin1', 'JOHN', 'admin1@example.com', 'password1', 2, 3),
-('User1', 'DOE', 'user1@example.com', 'password1', 1, 3);
-
 INSERT INTO Genre (Genre)
 VALUES
 ('Homme'),
 ('Femme'),
 ('Autre');
+
+INSERT INTO USER (Nom, Prenom, Email, Password, UserTypeId, GenreId)
+VALUES
+('Admin1', 'JOHN', 'admin1@example.com', 'password1', 2, 3),
+('User1', 'DOE', 'user1@example.com', 'password1', 1, 3);
 
 INSERT INTO TypeDeRegime (TypeDeRegime)
 VALUES

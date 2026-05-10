@@ -51,6 +51,167 @@ class TraitementProfil
         return $row ?: null;
     }
 
+    public function getUserSolde(int $userId): float
+    {
+        $stmt = $this->pdo->prepare('SELECT Solde FROM UserSolde WHERE UserId = ? LIMIT 1');
+        $stmt->execute([$userId]);
+        $value = $stmt->fetchColumn();
+
+        return $value !== false ? (float) $value : 0.0;
+    }
+
+    public function checkCodeForSolde(string $codeValue): array
+    {
+        $codeValue = trim($codeValue);
+
+        if ($codeValue === '') {
+            return [
+                'success' => false,
+                'message' => 'Veuillez saisir un code.',
+            ];
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif, ac.Id AS ApplicationId
+             FROM Code c
+             LEFT JOIN ApplicationCode ac ON ac.CodeId = c.Id
+               WHERE UPPER(TRIM(c.Code)) = UPPER(TRIM(?))
+             LIMIT 1'
+        );
+        $stmt->execute([$codeValue]);
+        $code = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$code) {
+            return [
+                'success' => false,
+                'message' => 'Code introuvable.',
+            ];
+        }
+
+        if (!empty($code['ApplicationId'])) {
+            return [
+                'success' => false,
+                'message' => 'Ce code a déjà été utilisé.',
+            ];
+        }
+
+        if ((int) ($code['Actif'] ?? 0) !== 1) {
+            return [
+                'success' => false,
+                'message' => 'Ce code n’est plus valide.',
+            ];
+        }
+
+        if (!empty($code['DateExpiration'])) {
+            $today = new \DateTimeImmutable('today');
+            $expiry = new \DateTimeImmutable($code['DateExpiration']);
+
+            if ($expiry < $today) {
+                return [
+                    'success' => false,
+                    'message' => 'Ce code est expiré.',
+                ];
+            }
+        }
+
+        $amount = round((float) ($code['Valeur'] ?? 0), 2);
+        if ($amount <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Ce code ne contient aucun montant.',
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Code valide.',
+            'amount' => $amount,
+            'code' => $code['Code'],
+        ];
+    }
+
+    public function applyCodeToSolde(int $userId, string $codeValue): array
+    {
+        $codeValue = trim($codeValue);
+
+        if ($codeValue === '') {
+            return [
+                'success' => false,
+                'message' => 'Veuillez saisir un code.',
+            ];
+        }
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $stmt = $this->pdo->prepare(
+                'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif, ac.Id AS ApplicationId
+                 FROM Code c
+                 LEFT JOIN ApplicationCode ac ON ac.CodeId = c.Id
+                  WHERE UPPER(TRIM(c.Code)) = UPPER(TRIM(?))
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $stmt->execute([$codeValue]);
+            $code = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$code) {
+                $this->pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Code introuvable.',
+                ];
+            }
+
+            $check = $this->checkCodeForSolde($codeValue);
+            if (empty($check['success'])) {
+                $this->pdo->rollBack();
+                return $check;
+            }
+
+            $amount = (float) $check['amount'];
+
+            $stmt = $this->pdo->prepare('SELECT Id, Solde FROM UserSolde WHERE UserId = ? LIMIT 1 FOR UPDATE');
+            $stmt->execute([$userId]);
+            $soldeRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            $balanceBefore = (float) ($soldeRow['Solde'] ?? 0);
+            $balanceAfter = round($balanceBefore + $amount, 2);
+
+            if ($soldeRow) {
+                $updateSolde = $this->pdo->prepare('UPDATE UserSolde SET Solde = ? WHERE UserId = ?');
+                $updateSolde->execute([$balanceAfter, $userId]);
+            } else {
+                $insertSolde = $this->pdo->prepare('INSERT INTO UserSolde (UserId, Solde) VALUES (?, ?)');
+                $insertSolde->execute([$userId, $balanceAfter]);
+            }
+
+            $insertApplication = $this->pdo->prepare(
+                'INSERT INTO ApplicationCode (UserId, CodeId, BalanceAvant, BalanceApres) VALUES (?, ?, ?, ?)'
+            );
+            $insertApplication->execute([$userId, (int) $code['Id'], $balanceBefore, $balanceAfter]);
+
+            $this->pdo->commit();
+
+            return [
+                'success' => true,
+                'message' => 'Solde ajouté avec succès.',
+                'amount' => $amount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $balanceAfter,
+            ];
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de l’application du code.',
+            ];
+        }
+    }
+
     public function updateProfile(int $userId, array $data): array
     {
         $nom = trim($data['nom'] ?? '');

@@ -30,6 +30,7 @@
         </div>
         <div class="profile-actions">
             <a class="btn btn-secondary" href="/dashboard">Retour dashboard</a>
+            <a class="btn btn-secondary" href="/profil/solde">Ajouter du solde</a>
             <a class="btn btn-primary" href="/logout">Se déconnecter</a>
         </div>
     </section>
