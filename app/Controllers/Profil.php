@@ -19,6 +19,7 @@ class Profil extends BaseController
         $user = $traitement->getProfile($userId);
         $genres = $traitement->getGenres();
         $currentRegime = $traitement->getCurrentRegime($userId);
+        $currentSolde = $traitement->getUserSolde($userId);
 
         if ($currentRegime) {
             try {
@@ -42,7 +43,65 @@ class Profil extends BaseController
             'user' => $user,
             'genres' => $genres,
             'currentRegime' => $currentRegime ?? null,
+            'currentSolde' => $currentSolde,
         ]);
+    }
+
+    public function addSolde()
+    {
+        $session = service('session');
+        $userId = (int) $session->get('user_id');
+
+        if (empty($userId)) {
+            return redirect()->to('/SignIn');
+        }
+
+        $traitement = new TraitementProfil();
+
+        return view('Solde/Add', [
+            'currentSolde' => $traitement->getUserSolde($userId),
+        ]);
+    }
+
+    public function addSoldePost()
+    {
+        $session = service('session');
+        $userId = (int) $session->get('user_id');
+
+        if (empty($userId)) {
+            return redirect()->to('/SignIn');
+        }
+
+        $code = trim((string) $this->request->getPost('code'));
+        $traitement = new TraitementProfil();
+        $result = $traitement->applyCodeToSolde($userId, $code);
+
+        if (!empty($result['success'])) {
+            $session->setFlashdata('flash_success', $result['message'] ?? 'Solde ajouté.');
+            return redirect()->to('/profil');
+        }
+
+        $session->setFlashdata('flash_error', $result['message'] ?? 'Erreur lors de l’ajout du solde.');
+        return redirect()->to('/profil/solde');
+    }
+
+    public function checkSoldeCode()
+    {
+        $session = service('session');
+        $userId = (int) $session->get('user_id');
+
+        if (empty($userId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Non autorisé.',
+            ])->setStatusCode(401);
+        }
+
+        $code = trim((string) $this->request->getPost('code'));
+        $traitement = new TraitementProfil();
+        $result = $traitement->checkCodeForSolde($code);
+
+        return $this->response->setJSON($result);
     }
 
     public function update()
@@ -59,6 +118,11 @@ class Profil extends BaseController
 
         if (!empty($result['success'])) {
             $session->setFlashdata('flash_success', $result['message'] ?? 'Profil mis à jour.');
+            // Update session user_name so other pages (Myhome, header) show the new prenom immediately
+            $newPrenom = $this->request->getPost('prenom');
+            if (!empty($newPrenom)) {
+                $session->set('user_name', $newPrenom);
+            }
         } else {
             $session->setFlashdata('flash_error', $result['message'] ?? 'Erreur lors de la mise à jour.');
         }

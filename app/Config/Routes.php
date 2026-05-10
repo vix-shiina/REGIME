@@ -26,6 +26,9 @@ $routes->post('/SignUp', 'Auth::signupPost');
 $routes->get('/myhome', 'Myhome::index');
 $routes->get('/profil', 'Profil::index');
 $routes->post('/profil', 'Profil::update');
+$routes->get('/profil/solde', 'Profil::addSolde');
+$routes->post('/profil/solde', 'Profil::addSoldePost');
+$routes->post('/profil/solde/check', 'Profil::checkSoldeCode');
 $routes->get('/logout', 'Auth::logout');
 
 // Pages de gestion (vues) pour l'admin
