@@ -42,30 +42,15 @@ class TraitementLogin
 
     public function signin(array $data)
     {
-        $session = service('session');
-
-        $email = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
-        if (!$email || !$password){
-            $session->setFlashdata('flash_error', 'Tous les champs sont requis.');
-            return redirect()->to('/SignIn');
-        }
-
-        $stmt = $this->pdo->prepare('SELECT Id,Nom,Prenom FROM USER WHERE Email = ? AND Password = ?');
-        $stmt->execute([$email,$password]);
-        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if ($user){
-            $session->set('user_id', $user['Id']);
-            $session->set('user_name', $user['Prenom']);
-            $session->setFlashdata('flash_success', 'Connexion réussie. Bienvenue '.$user['Prenom'].'.');
-            return redirect()->to('/myhome');
-        }
-
-        $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');
-        return redirect()->to('/SignIn');
+        return $this->authenticate($data, '/SignIn');
     }
 
     public function adminSignin(array $data)
+    {
+        return $this->authenticate($data, '/admin');
+    }
+
+    private function authenticate(array $data, string $failureRedirect)
     {
         $session = service('session');
 
@@ -73,23 +58,26 @@ class TraitementLogin
         $password = $data['password'] ?? '';
         if (!$email || !$password){
             $session->setFlashdata('flash_error', 'Tous les champs sont requis.');
-            return redirect()->to('/admin');
+            return redirect()->to($failureRedirect);
         }
 
-        $stmt = $this->pdo->prepare('SELECT Id,Nom,Prenom,UserTypeId FROM USER WHERE Email = ? AND Password = ?');
+        $stmt = $this->pdo->prepare('SELECT Id, Nom, Prenom, UserTypeId FROM USER WHERE Email = ? AND Password = ?');
         $stmt->execute([$email,$password]);
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if ($user){
-            if ((int)$user['UserTypeId'] !== 2){
-                $session->setFlashdata('flash_error', 'Accès admin refusé.');
-                return redirect()->to('/admin');
-            }
+
+        if ($user) {
             $session->set('user_id', $user['Id']);
-            $session->setFlashdata('flash_success', 'Connexion admin réussie. Bienvenue '.$user['Prenom'].'.');
-            return redirect()->to('/admin-dashboard');
+            $session->set('user_type_id', (int) $user['UserTypeId']);
+            $session->set('user_type', ((int) $user['UserTypeId'] === 2) ? 'admin' : 'client');
+            $session->setFlashdata('flash_success', 'Connexion réussie. Bienvenue '.$user['Prenom'].'.');
+            if ((int) $user['UserTypeId'] === 2) {
+                return redirect()->to('/admin-dashboard');
+            }
+
+            return redirect()->to('/myhome');
         }
 
         $session->setFlashdata('flash_error', 'Email ou mot de passe invalide.');
-        return redirect()->to('/admin');
+        return redirect()->to($failureRedirect);
     }
 }

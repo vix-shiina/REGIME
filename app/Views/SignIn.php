@@ -8,7 +8,6 @@
     <script defer src="/assets/js/signin.js"></script>
 </head>
 <body>
-<a class="admin-link" href="/admin">Acces admin</a>
 <div class="auth-page split">
     <div class="left-side">
         <img src="/assets/images/regime.png" alt="regime">
