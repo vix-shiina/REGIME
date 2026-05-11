@@ -10,6 +10,7 @@
 <body>
 <?php $user = $user ?? []; ?>
 <?php $genres = $genres ?? []; ?>
+<?php $isGoldClient = (($currentRegime['Paiement'] ?? '') === 'Paiement unique'); ?>
 
 <?php echo view('partials/Header'); ?>
 
@@ -87,7 +88,8 @@
                                 <?php echo htmlspecialchars($currentRegime['RegimeNom'] ?? '-'); ?><br>
                                 Début : <?php echo htmlspecialchars($currentRegime['DateDebut'] ?? '-'); ?><br>
                                 Durée : <?php echo htmlspecialchars((string) ($currentRegime['DureeEnJours'] ?? '-')); ?> jours<br>
-                                Restant : <?php echo isset($currentRegime['remaining_days']) ? htmlspecialchars((string) $currentRegime['remaining_days']) . ' jour(s)' : '-'; ?>
+                                Restant : <?php echo isset($currentRegime['remaining_days']) ? htmlspecialchars((string) $currentRegime['remaining_days']) . ' jour(s)' : '-'; ?><br>
+                                Statut : <?php echo $isGoldClient ? 'Client Gold' : 'Client standard'; ?>
                             </dd>
                         </div>
                     </dl>
@@ -154,8 +156,8 @@
                                 <input type="number" step="0.1" name="taille" value="<?php echo htmlspecialchars((string) ($user['Taille'] ?? '')); ?>" disabled>
                             </label>
                             <label>
-                                <span>Poids (kg)</span>
-                                <input type="number" step="0.1" name="poids" value="<?php echo htmlspecialchars((string) ($user['Poids'] ?? '')); ?>" disabled>
+                                <span>Poids (kg)<?php echo !empty($user['Poids']) ? ' <span style="color: #888; font-size: 0.85em;">(Suivi via Evolution)</span>' : ''; ?></span>
+                                <input type="number" step="0.1" name="poids" value="<?php echo htmlspecialchars((string) ($user['Poids'] ?? '')); ?>" <?php echo !empty($user['Poids']) ? 'disabled title="Le poids est suivi automatiquement via votre historique d\'évolution"' : ''; ?>>
                             </label>
                         </div>
                     </article>

@@ -211,6 +211,9 @@ class TraitementRegime
         $durationMonths = isset($payload['duration_months']) && (float) $payload['duration_months'] > 0
             ? (float) $payload['duration_months']
             : 0.0;
+        $paymentType = in_array(($payload['payment_type'] ?? ''), ['Paiement unique', 'Abonnement'], true)
+            ? (string) $payload['payment_type']
+            : 'Abonnement';
         $sportId = !empty($payload['sport_id']) ? (int) $payload['sport_id'] : 0;
         $selectedSportId = !empty($payload['selected_sport_id']) ? (int) $payload['selected_sport_id'] : $sportId;
         $selectedRegimeId = !empty($payload['selected_regime_id']) ? (int) $payload['selected_regime_id'] : 0;
@@ -279,6 +282,7 @@ class TraitementRegime
                 'target_bmi' => $targetBmi,
                 'target_value' => $targetValue,
                 'target_unit' => $targetUnit,
+                'payment_type' => $paymentType,
             ];
 
             return $this->storeSelection($userId, $preview, $weight, $height, $durationMonths, $mode, $selectedSportId, $frequency);
@@ -296,6 +300,8 @@ class TraitementRegime
             return $preview;
         }
 
+        $preview['payment_type'] = $paymentType;
+
         return $this->storeSelection($userId, $preview, $weight, $height, $durationMonths, $mode, $selectedSportId, $frequency);
     }
 
@@ -310,10 +316,42 @@ class TraitementRegime
         }
 
         $durationDays = max(1, (int) round(($durationMonths > 0 ? $durationMonths : max(1, (float) ($preview['recommended_weeks'] ?? 4) / 4.33)) * 30));
+        $paymentType = in_array(($preview['payment_type'] ?? ''), ['Paiement unique', 'Abonnement'], true)
+            ? (string) $preview['payment_type']
+            : 'Abonnement';
+
+        $dailyPrice = max(0.0, (float) ($best['PrixJournaliere'] ?? 0));
+        $amountDue = $paymentType === 'Paiement unique'
+            ? round($dailyPrice * $durationDays, 2)
+            : round($dailyPrice * 30, 2);
 
         try {
             $this->pdo->beginTransaction();
             $this->upsertPhysicalInfo($userId, $weight, $height);
+
+            $balanceStmt = $this->pdo->prepare('SELECT Id, Solde FROM UserSolde WHERE UserId = ? LIMIT 1 FOR UPDATE');
+            $balanceStmt->execute([$userId]);
+            $balanceRow = $balanceStmt->fetch(\PDO::FETCH_ASSOC);
+
+            $currentBalance = (float) ($balanceRow['Solde'] ?? 0);
+            if ($currentBalance < $amountDue) {
+                $this->pdo->rollBack();
+
+                return [
+                    'success' => false,
+                    'message' => 'Solde insuffisant pour effectuer ce paiement. Veuillez ajouter du solde.',
+                ];
+            }
+
+            $newBalance = round($currentBalance - $amountDue, 2);
+
+            if ($balanceRow) {
+                $updateBalance = $this->pdo->prepare('UPDATE UserSolde SET Solde = ? WHERE UserId = ?');
+                $updateBalance->execute([$newBalance, $userId]);
+            } else {
+                $insertBalance = $this->pdo->prepare('INSERT INTO UserSolde (UserId, Solde) VALUES (?, ?)');
+                $insertBalance->execute([$userId, $newBalance]);
+            }
 
             $insert = $this->pdo->prepare(
                 'INSERT INTO RegimeUser (UserId, RegimeId, DateDebut, DureeEnJours, Paiement) VALUES (?, ?, CURDATE(), ?, ?)'
@@ -322,7 +360,7 @@ class TraitementRegime
                 $userId,
                 (int) $best['Id'],
                 $durationDays,
-                $durationDays > 30 ? 'Abonnement' : 'Paiement unique',
+                $paymentType,
             ]);
 
             if ($sportId > 0) {
@@ -342,6 +380,9 @@ class TraitementRegime
                 'success' => true,
                 'message' => $mode === 'custom' ? 'Régime personnalisé créé avec succès.' : 'Régime suggéré appliqué avec succès.',
                 'selected_regime' => $best,
+                'payment_type' => $paymentType,
+                'amount_paid' => $amountDue,
+                'balance_after' => $newBalance,
             ];
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) {

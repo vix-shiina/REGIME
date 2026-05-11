@@ -11,9 +11,8 @@ class Dashboard extends BaseController
    public function index()
     {
         $session = service('session');
-        $userId = $session->get('user_id'); // On récupère l'ID ici
+        $userId = $session->get('user_id');
 
-        // Sécurité : si non connecté, retour au login
         if (empty($userId)) {
             return redirect()->to('/SignIn');
         }
@@ -21,12 +20,82 @@ class Dashboard extends BaseController
         $evolutionModel = new EvolutionModel();
         $regimeModel = new RegimeModel();
         $sportModel = new SportModel();
+        
+        // Get current taille and poids from UserInfo
+        $db = db_connect();
+        $userInfo = $db->table('UserInfo')
+            ->select('Taille, Poids')
+            ->where('UserId', $userId)
+            ->get()
+            ->getRowArray();
+        $currentTaille = !empty($userInfo['Taille']) ? (float) $userInfo['Taille'] : null;
+        $initialPoids = !empty($userInfo['Poids']) ? (float) $userInfo['Poids'] : null;
+        
+        // Get evolution history
+        $historique = $evolutionModel->getEvolutionByUser($userId);
+        
+        // Initialize with both poids and IMC calculated
+        $historiqueWithIMC = [];
+        
+        // Add initial weight as first entry if it exists and not already in history
+        if (!empty($initialPoids) && !empty($currentTaille)) {
+            $poidsInitialExists = false;
+            foreach ($historique as $item) {
+                if ($item['Poids'] == $initialPoids) {
+                    $poidsInitialExists = true;
+                    break;
+                }
+            }
+            
+            if (!$poidsInitialExists) {
+                $initialIMC = round($initialPoids / (($currentTaille / 100) ** 2), 2);
+                $historiqueWithIMC[] = [
+                    'DateEvolution' => 'Poids initial',
+                    'Poids' => $initialPoids,
+                    'IMC' => $initialIMC
+                ];
+            }
+        }
+        
+        // Process all evolution entries and calculate IMC
+        foreach ($historique as $item) {
+            $poids = !empty($item['Poids']) ? (float) $item['Poids'] : 0;
+            $imc = ($currentTaille > 0 && $poids > 0) ? round($poids / (($currentTaille / 100) ** 2), 2) : null;
+            $item['IMC'] = $imc;
+            $historiqueWithIMC[] = $item;
+        }
+
+        // Calculate statistics
+        $stats = $this->calculateStatistics($historiqueWithIMC, $userId, $db);
+        
+        // Get regime and sport data for calendar
+        $currentRegime = $db->table('RegimeUser')
+            ->select('RegimeUser.*, r.RegimeNom')
+            ->join('REGIME r', 'r.Id = RegimeUser.RegimeId')
+            ->where('RegimeUser.UserId', $userId)
+            ->orderBy('RegimeUser.DateDebut', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRow();
+        
+        $currentSport = $db->table('SportUser')
+            ->select('SportUser.*, s.SportNom')
+            ->join('SPORT s', 's.Id = SportUser.SportId')
+            ->where('SportUser.UserId', $userId)
+            ->orderBy('SportUser.DateDebut', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRow();
 
         $data = [
-            'historique' => $evolutionModel->getEvolutionByUser($userId),
+            'historique' => $historiqueWithIMC,
             'regimes'    => $regimeModel->getRegimesWithDetails(),
             'sports'     => $sportModel->getSportsWithTypes(),
             'userId'     => $userId,
+            'currentRegime' => $currentRegime,
+            'currentSport' => $currentSport,
+            'currentTaille' => $currentTaille,
+            'stats'      => $stats,
             'page_title' => 'Mon Suivi'
         ];
 
@@ -41,12 +110,27 @@ class Dashboard extends BaseController
             return redirect()->to('/SignIn');
         }
 
+        $poids = $this->request->getPost('poids');
+        $dateEvolution = $this->request->getPost('dateEvolution') ?? date('Y-m-d');
+        
         $evolutionModel = new EvolutionModel();
         $evolutionModel->insert([
-            'UserId'         => $userId, // Utilise l'ID de la session
-            'Poids'          => $this->request->getPost('poids'),
-            'DateEvolution'  => date('Y-m-d')
+            'UserId'         => $userId,
+            'Poids'          => $poids,
+            'DateEvolution'  => $dateEvolution
         ]);
+        
+        // Get the latest weight from Evolution and update UserInfo
+        $latestEvolution = $evolutionModel->where('UserId', $userId)
+                                          ->orderBy('DateEvolution', 'DESC')
+                                          ->first();
+        
+        if (!empty($latestEvolution)) {
+            $db = db_connect();
+            $db->table('UserInfo')
+               ->where('UserId', $userId)
+               ->update(['Poids' => $latestEvolution['Poids']]);
+        }
         
         return redirect()->to('/dashboard');
     }
@@ -93,5 +177,91 @@ class Dashboard extends BaseController
         $sportModel->selectSportForUser($userId, $sportId, $durationDays);
 
         return redirect()->to('/dashboard')->with('success', 'Sport sélectionné avec succès.');
+    }
+
+    private function calculateStatistics($historique, $userId, $db)
+    {
+        $stats = [
+            'totalEntries' => count($historique),
+            'poidsInitial' => null,
+            'poidsCurrent' => null,
+            'poidsPerte' => 0,
+            'imcInitial' => null,
+            'imcCurrent' => null,
+            'poidsMin' => null,
+            'poidsMax' => null,
+            'poidsMoyen' => 0,
+            'regimeData' => [],
+            'sportData' => [],
+            'imcCategories' => [
+                'maigreur' => 0,
+                'normal' => 0,
+                'surpoids' => 0,
+                'obesite' => 0
+            ]
+        ];
+
+        if (empty($historique)) {
+            return $stats;
+        }
+
+        // Get initial and current weight/IMC
+        $stats['poidsInitial'] = $historique[0]['Poids'] ?? null;
+        $stats['imcInitial'] = $historique[0]['IMC'] ?? null;
+        $lastEntry = end($historique);
+        $stats['poidsCurrent'] = $lastEntry['Poids'] ?? null;
+        $stats['imcCurrent'] = $lastEntry['IMC'] ?? null;
+
+        // Calculate weight loss
+        if (!empty($stats['poidsInitial']) && !empty($stats['poidsCurrent'])) {
+            $stats['poidsPerte'] = round($stats['poidsInitial'] - $stats['poidsCurrent'], 2);
+        }
+
+        // Calculate min, max, average weight
+        $poids = array_column($historique, 'Poids');
+        $poids = array_filter($poids, fn($p) => !empty($p));
+        
+        if (!empty($poids)) {
+            $stats['poidsMin'] = min($poids);
+            $stats['poidsMax'] = max($poids);
+            $stats['poidsMoyen'] = round(array_sum($poids) / count($poids), 2);
+        }
+
+        // Categorize IMC values
+        foreach ($historique as $entry) {
+            if (!empty($entry['IMC'])) {
+                if ($entry['IMC'] < 18.5) {
+                    $stats['imcCategories']['maigreur']++;
+                } elseif ($entry['IMC'] < 25) {
+                    $stats['imcCategories']['normal']++;
+                } elseif ($entry['IMC'] < 30) {
+                    $stats['imcCategories']['surpoids']++;
+                } else {
+                    $stats['imcCategories']['obesite']++;
+                }
+            }
+        }
+
+        // Get regime statistics
+        $regimeStats = $db->table('RegimeUser')
+            ->select('r.RegimeNom, COUNT(*) as nombre')
+            ->join('REGIME r', 'r.Id = RegimeUser.RegimeId')
+            ->where('RegimeUser.UserId', $userId)
+            ->groupBy('RegimeUser.RegimeId')
+            ->get()
+            ->getResultArray();
+        $stats['regimeData'] = $regimeStats;
+
+        // Get sport statistics
+        $sportStats = $db->table('SportUser')
+            ->select('s.SportNom, COUNT(*) as nombre')
+            ->join('SPORT s', 's.Id = SportUser.SportId')
+            ->where('SportUser.UserId', $userId)
+            ->groupBy('SportUser.SportId')
+            ->get()
+            ->getResultArray();
+        $stats['sportData'] = $sportStats;
+
+        return $stats;
     }
 }

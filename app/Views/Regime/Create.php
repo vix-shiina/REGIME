@@ -11,6 +11,14 @@
 <?php
 $user = $user ?? [];
 $sports = $sports ?? [];
+$initialPreview = $initialPreview ?? null;
+
+$initialWeight = !empty($user['Poids']) ? (float) $user['Poids'] : null;
+$initialHeightCm = !empty($user['Taille']) ? (float) $user['Taille'] : null;
+$initialHeightM = !empty($initialHeightCm) ? $initialHeightCm / 100 : null;
+$initialImc = (!empty($initialWeight) && !empty($initialHeightM))
+    ? round($initialWeight / ($initialHeightM * $initialHeightM), 1)
+    : null;
 ?>
 
 <?php echo view('partials/Header'); ?>
@@ -227,7 +235,10 @@ $sports = $sports ?? [];
                         </label>
                         <label id="conseilFreqLabel" style="display:none">
                             <span>Fréquence (par semaine)</span>
-                            <input type="range" min="0" max="7" step="1" id="conseilFreqRange" value="0">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <input type="range" min="1" max="7" step="1" id="conseilFreqRange" value="1" style="flex:1">
+                                <strong id="conseilFreqValue" style="min-width:24px;text-align:center">1</strong>
+                            </div>
                         </label>
                     </div>
 
@@ -261,7 +272,10 @@ $sports = $sports ?? [];
                         </label>
                         <label id="persoFreqLabel" style="display:none">
                             <span>Fréquence (par semaine)</span>
-                            <input type="range" min="0" max="7" step="1" id="persoFreqRange" value="0">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <input type="range" min="1" max="7" step="1" id="persoFreqRange" value="1" style="flex:1">
+                                <strong id="persoFreqValue" style="min-width:24px;text-align:center">1</strong>
+                            </div>
                         </label>
                     </div>
 
@@ -316,12 +330,29 @@ $sports = $sports ?? [];
                     <p class="question-help">Régime et sport recommandés suite à notre algorithme.</p>
 
                     <div class="preview-box" id="conseilSuggestionBox">
-                        <p class="muted">Suggestion du régime et du sport (à remplir).</p>
+                        <?php if (!empty($initialPreview) && !empty($initialPreview['best_regime'])): ?>
+                            <div class="preview-state">
+                                <div><strong>Régime conseillé :</strong> <span><?= htmlspecialchars((string) ($initialPreview['best_regime']['RegimeNom'] ?? '-')) ?></span></div>
+                                <div><strong>Type :</strong> <span><?= htmlspecialchars((string) ($initialPreview['best_regime']['TypeDeRegime'] ?? '-')) ?></span></div>
+                                <div><strong>IMC actuel :</strong> <span><?= htmlspecialchars((string) ($initialPreview['current_imc'] ?? $initialImc ?? '-')) ?></span></div>
+                                <div><strong>Poids actuel :</strong> <span><?= htmlspecialchars((string) ($initialWeight !== null ? number_format($initialWeight, 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Poids cible théorique :</strong> <span><?= htmlspecialchars((string) (!empty($initialPreview['target_weight']) ? number_format((float) $initialPreview['target_weight'], 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Durée conseillée :</strong> <span><?= htmlspecialchars((string) (!empty($initialPreview['recommended_weeks']) ? number_format((float) $initialPreview['recommended_weeks'], 1, ',', ' ') . ' semaine(s)' : '-')) ?></span></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="preview-state">
+                                <div><strong>IMC actuel :</strong> <span><?= htmlspecialchars((string) ($initialImc ?? '-')) ?></span></div>
+                                <div><strong>Poids actuel :</strong> <span><?= htmlspecialchars((string) ($initialWeight !== null ? number_format($initialWeight, 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Poids cible théorique :</strong> <span>-</span></div>
+                                <div><strong>Durée conseillée :</strong> <span>-</span></div>
+                                <div><strong>Info :</strong> <span>Aucune cure exacte n'a encore été calculée.</span></div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="conseil-3">Retour</button>
-                        <button type="button" class="submit-btn" data-go-step="conseil-5">Valider</button>
+                        <button type="button" class="submit-btn" data-go-step="conseil-5">Accepter la cure</button>
                         <button type="button" class="back-btn secondary" data-go-step="0.5">Annuler</button>
                     </div>
                 </div>
@@ -335,12 +366,28 @@ $sports = $sports ?? [];
                     <p class="question-help">Régime et sport recommandés suite à notre algorithme.</p>
 
                     <div class="preview-box" id="persoSuggestionBox">
-                        <p class="muted">Suggestion du régime et du sport (à remplir).</p>
+                        <?php if (!empty($initialPreview) && !empty($initialPreview['best_regime'])): ?>
+                            <div class="preview-state">
+                                <div><strong>Régime conseillé :</strong> <span><?= htmlspecialchars((string) ($initialPreview['best_regime']['RegimeNom'] ?? '-')) ?></span></div>
+                                <div><strong>IMC actuel :</strong> <span><?= htmlspecialchars((string) ($initialPreview['current_imc'] ?? $initialImc ?? '-')) ?></span></div>
+                                <div><strong>Poids actuel :</strong> <span><?= htmlspecialchars((string) ($initialWeight !== null ? number_format($initialWeight, 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Poids cible théorique :</strong> <span><?= htmlspecialchars((string) (!empty($initialPreview['target_weight']) ? number_format((float) $initialPreview['target_weight'], 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Durée conseillée :</strong> <span><?= htmlspecialchars((string) (!empty($initialPreview['recommended_weeks']) ? number_format((float) $initialPreview['recommended_weeks'], 1, ',', ' ') . ' semaine(s)' : '-')) ?></span></div>
+                            </div>
+                        <?php else: ?>
+                            <div class="preview-state">
+                                <div><strong>IMC actuel :</strong> <span><?= htmlspecialchars((string) ($initialImc ?? '-')) ?></span></div>
+                                <div><strong>Poids actuel :</strong> <span><?= htmlspecialchars((string) ($initialWeight !== null ? number_format($initialWeight, 1, ',', ' ') . ' kg' : '-')) ?></span></div>
+                                <div><strong>Poids cible théorique :</strong> <span>-</span></div>
+                                <div><strong>Durée conseillée :</strong> <span>-</span></div>
+                                <div><strong>Info :</strong> <span>Aucune cure exacte n'a encore été calculée.</span></div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="perso-4">Retour</button>
-                        <button type="button" class="submit-btn" data-go-step="perso-6">Valider</button>
+                        <button type="button" class="submit-btn" data-go-step="perso-6">Accepter la cure</button>
                         <button type="button" class="back-btn secondary" data-go-step="0.5">Annuler</button>
                     </div>
                 </div>

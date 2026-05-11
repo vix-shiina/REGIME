@@ -32,6 +32,15 @@ if (!empty($session->get('user_id'))) {
 }
 ?>
 
+<?php if ($activeNav === 'myhome'): ?>
+    <div class="promo-ticker">
+        <div class="promo-ticker-content">
+            <span class="promo-ticker-item"> <img src="/assets/images/icons/coin.png" alt="Coin" class="icon"> Devenez client GOLD en payant en 1 fois, 15% de remise</span>
+        
+        </div>
+    </div>
+<?php endif; ?>
+
 <header class="site-header">
     <div class="header-inner">
         <div class="brand">
@@ -72,3 +81,5 @@ if (!empty($session->get('user_id'))) {
         </div>
     </div>
 </header>
+
+

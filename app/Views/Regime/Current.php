@@ -83,7 +83,7 @@ $priceDailyDisplay = $priceDailyValue !== null
     : '-';
 
 $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
-    ? number_format($priceDailyValue * $durationDays, 0, ',', ' ') . ' Ar'
+    ? number_format(($payment === 'Paiement unique' ? $priceDailyValue * $durationDays : $priceDailyValue * 30), 0, ',', ' ') . ' Ar'
     : '-';
 
 ?>
@@ -232,7 +232,12 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 
             <div class="regime-row">
                 <span>Paiement</span>
-                <strong><?php echo htmlspecialchars($payment); ?></strong>
+                <strong>
+                    <?php echo htmlspecialchars($payment); ?>
+                    <?php if ($payment === 'Paiement unique'): ?>
+                        — Client Gold
+                    <?php endif; ?>
+                </strong>
             </div>
 
         </article>
