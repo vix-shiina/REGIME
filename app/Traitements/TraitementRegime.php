@@ -323,9 +323,11 @@ class TraitementRegime
             : 'Abonnement';
 
         $dailyPrice = max(0.0, (float) ($best['PrixJournaliere'] ?? 0));
+        // Abonnement (plusieurs fois): débit seulement 1 jour du solde, le reste est en cash
+        // Paiement unique: débit la totalité
         $amountDue = $paymentType === 'Paiement unique'
             ? round($dailyPrice * $durationDays, 2)
-            : round($dailyPrice * 30, 2);
+            : round($dailyPrice, 2);
 
         try {
             $this->pdo->beginTransaction();
@@ -339,9 +341,13 @@ class TraitementRegime
             if ($currentBalance < $amountDue) {
                 $this->pdo->rollBack();
 
+                $insufficientMsg = $paymentType === 'Abonnement'
+                    ? sprintf('Solde insuffisant. Le premier jour coûte %.2f Ar. Veuillez ajouter du solde.', $amountDue)
+                    : sprintf('Solde insuffisant. Le montant total est %.2f Ar. Veuillez ajouter du solde.', $amountDue);
+
                 return [
                     'success' => false,
-                    'message' => 'Solde insuffisant pour effectuer ce paiement. Veuillez ajouter du solde.',
+                    'message' => $insufficientMsg,
                 ];
             }
 
@@ -378,9 +384,14 @@ class TraitementRegime
 
             $this->pdo->commit();
 
+            $successMsg = $mode === 'custom' ? 'Régime personnalisé créé avec succès.' : 'Régime suggéré appliqué avec succès.';
+            if ($paymentType === 'Abonnement') {
+                $successMsg .= sprintf(' Premier jour débité du solde (%.2f Ar), le reste en cash.', $amountDue);
+            }
+
             return [
                 'success' => true,
-                'message' => $mode === 'custom' ? 'Régime personnalisé créé avec succès.' : 'Régime suggéré appliqué avec succès.',
+                'message' => $successMsg,
                 'selected_regime' => $best,
                 'payment_type' => $paymentType,
                 'amount_paid' => $amountDue,

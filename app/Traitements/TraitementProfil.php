@@ -71,27 +71,11 @@ class TraitementProfil
             ];
         }
 
-        $stmt = $this->pdo->prepare(
-            'SELECT ac.Id
-             FROM ApplicationCode ac
-             INNER JOIN Code c ON c.Id = ac.CodeId
-               WHERE TRIM(c.Code) = ?
-             LIMIT 1'
-        );
-        $stmt->execute([$codeValue]);
-        $application = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($application) {
-            return [
-                'success' => false,
-                'message' => 'Ce code a déjà été utilisé.',
-            ];
-        }
-
+        // Step 1: Find the code by its text value
         $stmt = $this->pdo->prepare(
             'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif
              FROM Code c
-               WHERE TRIM(c.Code) = ?
+             WHERE TRIM(c.Code) = ?
              LIMIT 1'
         );
         $stmt->execute([$codeValue]);
@@ -101,6 +85,23 @@ class TraitementProfil
             return [
                 'success' => false,
                 'message' => 'Code invalide.',
+            ];
+        }
+
+        // Step 2: Check if this specific code has already been used
+        $stmt = $this->pdo->prepare(
+            'SELECT ac.Id
+             FROM ApplicationCode ac
+             WHERE ac.CodeId = ?
+             LIMIT 1'
+        );
+        $stmt->execute([(int) $code['Id']]);
+        $application = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($application) {
+            return [
+                'success' => false,
+                'message' => 'Ce code a déjà été utilisé.',
             ];
         }
 
@@ -153,29 +154,11 @@ class TraitementProfil
         try {
             $this->pdo->beginTransaction();
 
-            $stmt = $this->pdo->prepare(
-                'SELECT ac.Id
-                 FROM ApplicationCode ac
-                 INNER JOIN Code c ON c.Id = ac.CodeId
-                  WHERE TRIM(c.Code) = ?
-                 LIMIT 1
-                 FOR UPDATE'
-            );
-            $stmt->execute([$codeValue]);
-            $application = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($application) {
-                $this->pdo->rollBack();
-                return [
-                    'success' => false,
-                    'message' => 'Ce code a déjà été utilisé.',
-                ];
-            }
-
+            // Step 1: Find the code by its text value (with lock)
             $stmt = $this->pdo->prepare(
                 'SELECT c.Id, c.Code, c.Valeur, c.DateExpiration, c.Actif
                  FROM Code c
-                  WHERE TRIM(c.Code) = ?
+                 WHERE TRIM(c.Code) = ?
                  LIMIT 1
                  FOR UPDATE'
             );
@@ -187,6 +170,25 @@ class TraitementProfil
                 return [
                     'success' => false,
                     'message' => 'Code invalide.',
+                ];
+            }
+
+            // Step 2: Check if this specific code has already been used (with lock)
+            $stmt = $this->pdo->prepare(
+                'SELECT ac.Id
+                 FROM ApplicationCode ac
+                 WHERE ac.CodeId = ?
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $stmt->execute([(int) $code['Id']]);
+            $application = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($application) {
+                $this->pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Ce code a déjà été utilisé.',
                 ];
             }
 

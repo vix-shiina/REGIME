@@ -19,23 +19,34 @@ VALUES
 INSERT INTO TypeDeRegime (TypeDeRegime)
 VALUES
 ('Prise de poids'),
-('Perte de poids');
+('Perte de poids'),
+('Maintien de la forme');
 
 INSERT INTO REGIME (RegimeNom, TypeDeRegimeId, PrixJournaliere, EfficacitePoidsParSemaine)
 VALUES
-('Regime Viande-Volaille', 1, 7000.00, 0.8),
-('Regime Viande-Poisson', 1, 7500.00, 0.85),
-('Regime Volaille-Poisson', 1, 6000.00, 0.75),
-('Regime Mixte 1', 1, 3500.00, 0.78),
-('Regime Mixte 2', 2, 7000.00, 0.9);
+('Régime Keto', 2, 8500.00, 1.2),
+('Régime Paléo', 2, 9000.00, 1.0),
+('Régime Méditerranéen', 3, 6500.00, 0.6),
+('Régime Vegan Équilibré', 2, 5500.00, 0.8),
+('Régime Protéiné +', 1, 9500.00, 1.1),
+('Régime Low Carb', 2, 7500.00, 0.95),
+('Régime DASH', 3, 6000.00, 0.7),
+('Régime Musculation', 1, 8000.00, 1.3),
+('Régime Hyperprotéiné', 1, 10000.00, 1.4),
+('Régime Équilibré', 3, 5000.00, 0.5);
 
 INSERT INTO CompoRegime (RegimeId, Viande, Poisson, Volailles)
 VALUES
-(1, 50, 0, 50),
-(2, 50, 50, 0),
-(3, 0, 50, 50),
-(4, 25, 25, 50),
-(5, 33, 33, 34);
+(1, 40, 40, 20),
+(2, 35, 35, 30),
+(3, 20, 40, 40),
+(4, 0, 30, 70),
+(5, 50, 25, 25),
+(6, 30, 45, 25),
+(7, 25, 40, 35),
+(8, 60, 20, 20),
+(9, 55, 25, 20),
+(10, 30, 30, 40);
 
 INSERT INTO TypeDeSport (TypeDeSport)
 VALUES
@@ -45,26 +56,31 @@ VALUES
 
 INSERT INTO SPORT (SportNom, TypeDeSportId, EfficacitePoidsParSceance)
 VALUES
-('Musculation', 1, 0.9),
-('Cardio', 2, 0.85),
-('Yoga', 3, 0.0),
-('CrossFit', 1, 0.88),
-('Pilates', 3, 0.0);
+('Musculation', 1, 1.1),
+('Cardio Intensif', 2, 1.0),
+('Yoga', 3, 0.2),
+('Running', 2, 0.95),
+('Natation', 2, 1.05),
+('CrossFit', 1, 1.15),
+('Pilates', 3, 0.3),
+('Boxe', 2, 1.2),
+('Cyclisme', 2, 0.9),
+('Danse', 3, 0.5);
 
-INSERT INTO Code (Code, Valeur)
+INSERT INTO Code (Code, Valeur, Actif)
 VALUES
-('CODE1', 100000.0),
-('CODE2', 8000.0),
-('CODE3', 5000.0),
-('CODE4', 10050.0),
-('CODE5', 5000.0),
-('CODE6', 5000.0),
-('CODE7', 3000.0),
-('CODE8', 8500.0),
-('CODE9', 9050.0),
-('CODE10', 5000.0),
-('CODE11', 10100.0),
-('CODE12', 12000.0),
-('CODE13', 13000.0),
-('CODE14', 14000.0),
-('CODE15', 15000.0);
+('REGIME2024', 50000.0, 1),
+('WELCOME500', 500000.0, 1),
+('STARTER100', 100000.0, 1),
+('PROMO1M', 1000000.0, 1),
+('BOOST50K', 50000.0, 1),
+('HEALTH25K', 25000.0, 1),
+('FITNESS10K', 10000.0, 1),
+('MEGA300K', 300000.0, 1),
+('SUMMER75K', 75000.0, 1),
+('GOLD200K', 200000.0, 1),
+('SILVER150K', 150000.0, 1),
+('BRONZE75K', 75000.0, 1),
+('LUCKY500K', 500000.0, 1),
+('DAILY25K', 25000.0, 1),
+('PLATINUM400K', 400000.0, 1);
