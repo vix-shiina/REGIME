@@ -86,7 +86,11 @@
                             <li><strong>Poisson :</strong> <?= (float)$r['Poisson'] ?>%</li>
                             <li><strong>Volaille :</strong> <?= (float)$r['Volailles'] ?>%</li>
                         </ul>
-                        <button style="width: 100%; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Choisir ce régime</button>
+                        <form action="<?= base_url('dashboard/select-regime/' . (int) $r['Id']) ?>" method="post" style="margin: 0;">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="regime_id" value="<?= (int) $r['Id'] ?>">
+                            <button type="submit" style="width: 100%; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Choisir ce régime</button>
+                        </form>
                     </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -113,13 +117,17 @@
                         <h4 style="margin: 0 0 12px; color: #0b1720; font-size: 1.1rem;"><?= htmlspecialchars($s['SportNom'] ?? '') ?></h4>
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 2rem; font-weight: 800; color: #2f8f51;">
-                                <?= (float)$s['EfficacitePoids'] ?> <span style="font-size: 0.8rem; color: #666;">kg/semaine</span>
+                                <?= (float) ($s['EfficacitePoids'] ?? 0) ?> <span style="font-size: 0.8rem; color: #666;">kg/semaine</span>
                             </div>
                         </div>
                         <ul style="margin: 16px 0; padding-left: 20px; color: #333; font-size: 0.95rem;">
                             <li><strong>Catégorie :</strong> <?= htmlspecialchars($s['Categorie'] ?? 'N/A') ?></li>
                         </ul>
-                        <button style="width: 100%; padding: 12px; background: linear-gradient(90deg, #4fbf7a, #6bd188); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Sélectionner</button>
+                        <form action="<?= base_url('dashboard/select-sport/' . (int) $s['Id']) ?>" method="post" style="margin: 0;">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="sport_id" value="<?= (int) $s['Id'] ?>">
+                            <button type="submit" style="width: 100%; padding: 12px; background: linear-gradient(90deg, #4fbf7a, #6bd188); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Sélectionner</button>
+                        </form>
                     </div>
                     <?php endforeach; ?>
                 <?php else: ?>

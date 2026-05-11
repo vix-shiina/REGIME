@@ -9,7 +9,7 @@ class SportModel extends Model {
 
     public function getSportsWithTypes() {
         return $this->select('SPORT.*, TypeDeSport.TypeDeSport as Categorie')
-                    ->join('TypeDeSport', 'TypeDeSport.Id = SPORT.TypeDeSportId')
+                    ->join('TypeDeSport', 'TypeDeSport.Id = SPORT.TypeDeSportId', 'left')
                     ->findAll();
     }
 
