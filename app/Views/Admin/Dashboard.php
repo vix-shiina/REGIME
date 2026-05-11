@@ -11,6 +11,9 @@
     <header class="admin-header">
         <h1>Espace Admin</h1>
         <p>Gestion rapide des principales sections</p>
+        <div class="header-actions">
+            <a class="btn btn-secondary" href="/auth/login">Retour au login</a>
+        </div>
     </header>
 
     <section class="admin-grid">

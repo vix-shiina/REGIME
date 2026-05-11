@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gérer les régimes</title>
     <link rel="stylesheet" href="/assets/css/admin.css">
+    <style>
+    /* Page-specific layout: two-column form, percentages aligned right */
+    .admin-form .form-grid{display:grid;grid-template-columns:1fr 220px;gap:16px;align-items:start}
+    .admin-form .form-grid .col .field{margin-bottom:12px}
+    .admin-form .form-grid .percentages .field{display:flex;flex-direction:column;align-items:flex-end}
+    .admin-form .form-grid .percentages input{text-align:right;width:80%}
+    @media (max-width:720px){.admin-form .form-grid{grid-template-columns:1fr}.admin-form .form-grid .percentages input{width:100%}}
+    </style>
 </head>
 <body>
     <?php $typeDeRegimeOptions = $typeDeRegimeOptions ?? []; ?>
@@ -24,38 +32,44 @@
             <h2>Créer un régime</h2>
             <form method="post" action="/admin/regimes/create" class="admin-form">
                 <?= csrf_field() ?>
-                <div class="field">
-                    <label>Nom du régime</label>
-                    <input type="text" name="RegimeNom" required>
-                </div>
-                <div class="field">
-                    <label>Type de régime</label>
-                    <select name="TypeDeRegimeId" required>
-                        <option value="">Sélectionnez un type</option>
-                        <?php foreach ($typeDeRegimeOptions as $option): ?>
-                            <option value="<?= $option['Id'] ?>"><?= $option['TypeDeRegime'] ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Prix journalière</label>
-                    <input type="number" step="0.01" name="PrixJournaliere">
-                </div>
-                <div class="field">
-                    <label>Efficacité (poids)</label>
-                    <input type="number" step="0.01" name="EfficacitePoids">
-                </div>
-                <div class="field">
-                    <label>Viande (%)</label>
-                    <input type="number" name="Viande" step="0.01" min="0" max="100" placeholder="0.00">
-                </div>
-                <div class="field">
-                    <label>Poisson (%)</label>
-                    <input type="number" name="Poisson" step="0.01" min="0" max="100" placeholder="0.00">
-                </div>
-                <div class="field">
-                    <label>Volailles (%)</label>
-                    <input type="number" name="Volailles" step="0.01" min="0" max="100" placeholder="0.00">
+                <div class="form-grid">
+                    <div class="col">
+                        <div class="field">
+                            <label>Nom du régime</label>
+                            <input type="text" name="RegimeNom" required>
+                        </div>
+                        <div class="field">
+                            <label>Type de régime</label>
+                            <select name="TypeDeRegimeId" required>
+                                <option value="">Sélectionnez un type</option>
+                                <?php foreach ($typeDeRegimeOptions as $option): ?>
+                                    <option value="<?= $option['Id'] ?>"><?= $option['TypeDeRegime'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Prix journalière</label>
+                            <input type="number" step="0.01" name="PrixJournaliere">
+                        </div>
+                        <div class="field">
+                            <label>Efficacité (poids)</label>
+                            <input type="number" step="0.01" name="EfficacitePoids">
+                        </div>
+                    </div>
+                    <div class="col percentages">
+                        <div class="field">
+                            <label>Viande (%)</label>
+                            <input type="number" name="Viande" step="0.01" min="0" max="100" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label>Poisson (%)</label>
+                            <input type="number" name="Poisson" step="0.01" min="0" max="100" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label>Volailles (%)</label>
+                            <input type="number" name="Volailles" step="0.01" min="0" max="100" placeholder="0.00">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" type="submit">Créer</button>
