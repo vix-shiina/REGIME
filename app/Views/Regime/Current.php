@@ -15,6 +15,7 @@
 <?php
 
 $currentRegime = $currentRegime ?? [];
+$user = $user ?? [];
 
 $regimeName = (string) ($currentRegime['RegimeNom'] ?? 'Mon régime');
 $type = (string) ($currentRegime['TypeDeRegime'] ?? '-');
@@ -150,6 +151,36 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
     </section>
 
     <section class="regime-grid">
+
+        <article class="regime-card">
+
+            <h2>
+                Identité
+            </h2>
+
+            <div class="regime-row">
+                <span>Nom</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Nom'] ?? '-')); ?></strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Prénom</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Prenom'] ?? '-')); ?></strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Âge</span>
+                <strong>
+                    <?php echo !empty($user['Age']) ? htmlspecialchars((string) $user['Age']) . ' ans' : '-'; ?>
+                </strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Genre</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Genre'] ?? '-')); ?></strong>
+            </div>
+
+        </article>
 
         <article class="regime-card">
 
@@ -309,6 +340,9 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 
     <section class="regime-actions">
 
+        <button class="regime-btn primary" type="button" onclick="window.print()">
+            Imprimer en PDF
+        </button>
 
         <a class="regime-btn secondary" href="/profil">
             Retour profil
@@ -319,6 +353,15 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 </main>
 
 <?php echo view('partials/Footer'); ?>
+
+<script>
+(function () {
+    const title = <?php echo json_encode($regimeName . ' - Mon régime', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    window.addEventListener('beforeprint', () => {
+        document.title = title;
+    });
+})();
+</script>
 
 </body>
 </html>

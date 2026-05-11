@@ -15,9 +15,10 @@ class TraitementRegime
     public function getUserContext(int $userId): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT u.Id, u.Nom, u.Prenom, ui.Age, ui.Taille, ui.Poids
+            'SELECT u.Id, u.Nom, u.Prenom, ui.Age, ui.Taille, ui.Poids, g.Genre
              FROM USER u
              LEFT JOIN UserInfo ui ON ui.UserId = u.Id
+             LEFT JOIN Genre g ON g.Id = u.GenreId
              WHERE u.Id = ?
              LIMIT 1'
         );
