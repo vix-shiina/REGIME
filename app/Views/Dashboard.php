@@ -11,6 +11,7 @@
 <body class="has-promo-header">
 
 <?php echo view('partials/Header'); ?>
+<?php $historique = $historique ?? []; ?>
 
 <main class="myhome container">
     <header class="welcome">
@@ -74,8 +75,13 @@
                     <div style="font-size: 1.8rem; font-weight: 700; color: #2f8f51;"><?= !empty($stats['poidsCurrent']) ? $stats['poidsCurrent'] : '-' ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
                 </div>
                 <div style="background: linear-gradient(135deg, rgba(231,76,60,0.1), rgba(241,196,15,0.1)); padding: 16px; border-radius: 10px; border-left: 4px solid #e74c3c;">
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Poids Perdu</div>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: #e74c3c;"><?= $stats['poidsPerte'] ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
+                    <?php
+                        $variationType = $stats['poidsVariationType'] ?? 'stable';
+                        $variationLabel = $variationType === 'pris' ? 'Poids Pris' : ($variationType === 'perdu' ? 'Poids Perdu' : 'Poids Stable');
+                        $variationColor = $variationType === 'pris' ? '#f39c12' : ($variationType === 'perdu' ? '#e74c3c' : '#2f8f51');
+                    ?>
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"><?= htmlspecialchars($variationLabel) ?></div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: <?= $variationColor ?>;"><?= number_format((float) ($stats['poidsPerte'] ?? 0), 2) ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
                 </div>
             </div>
 

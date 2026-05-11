@@ -186,6 +186,7 @@ class Dashboard extends BaseController
             'poidsInitial' => null,
             'poidsCurrent' => null,
             'poidsPerte' => 0,
+            'poidsVariationType' => 'stable',
             'imcInitial' => null,
             'imcCurrent' => null,
             'poidsMin' => null,
@@ -212,9 +213,20 @@ class Dashboard extends BaseController
         $stats['poidsCurrent'] = $lastEntry['Poids'] ?? null;
         $stats['imcCurrent'] = $lastEntry['IMC'] ?? null;
 
-        // Calculate weight loss
+        // Calculate weight variation with explicit direction
         if (!empty($stats['poidsInitial']) && !empty($stats['poidsCurrent'])) {
-            $stats['poidsPerte'] = round($stats['poidsInitial'] - $stats['poidsCurrent'], 2);
+            $delta = round((float) $stats['poidsCurrent'] - (float) $stats['poidsInitial'], 2);
+
+            if ($delta > 0) {
+                $stats['poidsVariationType'] = 'pris';
+                $stats['poidsPerte'] = $delta;
+            } elseif ($delta < 0) {
+                $stats['poidsVariationType'] = 'perdu';
+                $stats['poidsPerte'] = abs($delta);
+            } else {
+                $stats['poidsVariationType'] = 'stable';
+                $stats['poidsPerte'] = 0;
+            }
         }
 
         // Calculate min, max, average weight
