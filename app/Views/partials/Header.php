@@ -66,6 +66,9 @@ if (!empty($session->get('user_id'))) {
         </nav>
 
         <div class="header-actions">
+            <?php if (!empty($session->get('user_type')) && $session->get('user_type') === 'admin'): ?>
+                <a class="admin-manage-btn" href="<?= site_url('admin-dashboard') ?>" style="margin-right:12px;padding:8px 12px;border-radius:8px;background:#2f8f51;color:#fff;text-decoration:none;font-weight:600">Gérer</a>
+            <?php endif; ?>
             <button class="contact-btn" id="contactBtn" aria-label="Contactez nous">
                 <img src="/assets/images/icons/customer-service.png" alt="Contactez nous" class="icon">
                 <span class="contact-text">Contactez nous</span>

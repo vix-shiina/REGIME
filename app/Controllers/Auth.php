@@ -42,7 +42,7 @@ class Auth extends BaseController
     public function adminLogin()
     {
         session();
-        return view('SignInAdmin');
+        return view('SignIn');
     }
 
     public function adminLoginPost()

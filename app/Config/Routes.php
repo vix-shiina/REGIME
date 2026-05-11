@@ -33,11 +33,13 @@ $routes->post('/profil', 'Profil::update');
 $routes->get('/profil/solde', 'Profil::addSolde');
 $routes->post('/profil/solde', 'Profil::addSoldePost');
 $routes->post('/profil/solde/check', 'Profil::checkSoldeCode');
-$routes->get('/regime', 'Regime::index');
-$routes->get('/regime/pdf', 'Regime::downloadPdf');
-$routes->get('/regime/create', 'Regime::create');
-$routes->post('/regime/create', 'Regime::store');
 $routes->get('/logout', 'Auth::logout');
+$routes->get('/regime', 'Regime::index');
+$routes->get('regime', 'Regime::index');
+$routes->get('/regime/create', 'Regime::create');
+$routes->get('regime/create', 'Regime::create');
+$routes->post('/regime/create', 'Regime::store');
+$routes->post('regime/create', 'Regime::store');
 
 // Pages de gestion (vues) pour l'admin
 $routes->get('/admin/regimes/manage', 'AdminController::manageRegimes');
