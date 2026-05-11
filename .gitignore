@@ -1,0 +1,8 @@
+# Logs CodeIgniter
+writable/logs/
+writable/cache/
+writable/session/
+writable/debugbar/  
+
+# fichiers temporaires
+*.log

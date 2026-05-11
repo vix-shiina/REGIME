@@ -51,7 +51,7 @@ CREATE TABLE REGIME(
     RegimeNom VARCHAR(255) NOT NULL,
     TypeDeRegimeId INT,
     PrixJournaliere FLOAT,
-    EfficacitePoids FLOAT,
+    EfficacitePoidsParSemaine FLOAT,
     FOREIGN KEY (TypeDeRegimeId) REFERENCES TypeDeRegime(Id)
 );
 
@@ -83,7 +83,7 @@ CREATE TABLE SPORT(
     Id INT PRIMARY KEY AUTO_INCREMENT,
     SportNom VARCHAR(255) NOT NULL,
     TypeDeSportId INT,
-    EfficacitePoids FLOAT,
+    EfficacitePoidsParSceance FLOAT,
     FOREIGN KEY (TypeDeSportId) REFERENCES TypeDeSport(Id)
 );
 

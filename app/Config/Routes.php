@@ -33,6 +33,9 @@ $routes->post('/profil', 'Profil::update');
 $routes->get('/profil/solde', 'Profil::addSolde');
 $routes->post('/profil/solde', 'Profil::addSoldePost');
 $routes->post('/profil/solde/check', 'Profil::checkSoldeCode');
+$routes->get('/regime', 'Regime::index');
+$routes->get('/regime/create', 'Regime::create');
+$routes->post('/regime/create', 'Regime::store');
 $routes->get('/logout', 'Auth::logout');
 
 // Pages de gestion (vues) pour l'admin
