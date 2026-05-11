@@ -5,15 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - regime.com</title>
     <link rel="stylesheet" href="/assets/css/myhome.css">
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .dashboard-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 30px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: #fff; z-index: 100; padding-top: 10px; }
-        .dashboard-nav a { display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 10px 10px 0 0; background: #f3f5f9; color: #1f2937; font-weight: 600; text-decoration: none; border: 1px solid #e5e7eb; border-bottom: none; transition: all 0.2s; cursor: pointer; }
-        .dashboard-nav a:hover { background: #e5e7eb; }
-        .dashboard-nav a.is-active { background: #fff; color: #2f8f51; border-top: 3px solid #2f8f51; }
-        .dashboard-section { margin-bottom: 60px; padding-top: 30px; }
-        .dashboard-section:first-of-type { padding-top: 0; }
-    </style>
 </head>
 <body class="has-promo-header">
 
@@ -22,201 +15,199 @@
 <main class="myhome container">
     <header class="welcome">
         <h1>Votre Tableau de Bord</h1>
-        <p class="sub">Suivi de votre progression et recommandations</p>
+        <p class="sub">Suivi de votre progression</p>
     </header>
 
-    <!-- ===== NAVIGATION ===== -->
-    <nav class="dashboard-nav">
-        <a href="#graph" class="dashboard-link is-active" data-section="graph">📊 Graphique</a>
-        <a href="#regimes" class="dashboard-link" data-section="regimes">🍽️ Régimes</a>
-        <a href="#sports" class="dashboard-link" data-section="sports">⚽ Sports</a>
-    </nav>
-
-    <!-- ===== SECTION 1: GRAPH ===== -->
     <section id="graph" class="dashboard-section">
         <div style="background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(14,20,30,0.06); border: 1px solid rgba(15,23,42,0.10);">
-            <h3 style="margin: 0 0 16px; color: #2f8f51; font-size: 1.1rem;">Évolution de votre poids</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="background: linear-gradient(90deg, rgba(47,143,81,0.06), #fff); padding: 16px; border-radius: 10px; border: 1px solid rgba(47,143,81,0.1);">
-                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Poids Actuel</div>
-                    <div style="font-size: 2rem; font-weight: 800; color: #0b1720;">
-                        <?php echo !empty($historique) ? end($historique)['Poids'] : '0'; ?> <span style="font-size: 1.2rem;">kg</span>
-                    </div>
-                </div>
-                
-                <div style="background: linear-gradient(90deg, rgba(47,143,81,0.06), #fff); padding: 16px; border-radius: 10px; border: 1px solid rgba(47,143,81,0.1);">
-                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Mettre à jour</div>
-                    <form action="<?= base_url('dashboard/ajouterPoids') ?>" method="post" style="display: flex; gap: 8px;">
-                        <input type="hidden" name="userId" value="<?= $userId ?? '' ?>">
-                        <input type="number" step="0.1" name="poids" placeholder="Ex: 75.5" 
-                               style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
-                        <button type="submit" style="padding: 10px 16px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">OK</button>
-                    </form>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #2f8f51; font-size: 1.1rem;">Évolution de votre poids</h3>
+                <div style="font-size: 0.9rem; color: #666;">
+                    Date d'aujourd'hui : <strong><?= date('d/m/Y') ?></strong>
                 </div>
             </div>
             
-            <div style="height: 300px; position: relative;">
+            <div style="height: 300px; position: relative; margin-bottom: 20px;">
                 <canvas id="evolutionChart" style="width: 100%;"></canvas>
             </div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="dashboard-link" data-section="regimes" style="flex: 1; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Voir les régimes →</button>
+            <div style="display: flex; gap: 10px;">
+                <form id="evolutionForm" action="<?= base_url('dashboard/ajouterPoids') ?>" method="post" style="display: flex; gap: 8px; flex: 1;">
+                    <input type="hidden" name="userId" value="<?= $userId ?? '' ?>">
+                    <input type="date" name="dateEvolution" value="<?= date('Y-m-d') ?>" 
+                           style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;" required>
+                    <input type="number" step="0.1" id="poidsInput" name="poids" placeholder="Votre poids (kg)" 
+                           style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem;" required>
+                    <button type="submit" id="submitBtn" style="padding: 10px 20px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Enregistrer évolution</button>
+                </form>
             </div>
         </div>
     </section>
 
-    <!-- ===== SECTION 2: REGIMES ===== -->
-    <section id="regimes" class="dashboard-section">
-        <div>
-            <h2 style="margin: 0 0 20px; color: #2f8f51; font-size: 1.4rem;">Régimes suggérés pour vous</h2>
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Confirmer l'enregistrement</h2>
+            <div class="modal-body">
+                <p>Êtes-vous sûr(e) de vouloir enregistrer cette évolution ?</p>
+                <p style="margin: 12px 0 0; color: #666; font-size: 0.9rem;" id="confirmDetails"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="cancelBtn">Annuler</button>
+                <button class="btn-confirm" id="confirmBtn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+        </div>
+    </section>
+
+    <section id="stats" class="dashboard-section">
+        <div style="background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(14,20,30,0.06); border: 1px solid rgba(15,23,42,0.10);">
+            <h3 style="margin: 0 0 24px; color: #2f8f51; font-size: 1.2rem;">📊 Statistiques</h3>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                <?php if (!empty($regimes)): ?>
-                    <?php foreach ($regimes as $r): ?>
-                    <div style="background: linear-gradient(180deg, #fff, #fbfdff); border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(14,20,30,0.06); border: 1px solid rgba(15,23,42,0.10); border-top: 4px solid #2f8f51;">
-                        <h4 style="margin: 0 0 12px; color: #0b1720; font-size: 1.1rem;"><?= htmlspecialchars($r['RegimeNom'] ?? '') ?></h4>
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 2rem; font-weight: 800; color: #2f8f51;">
-                                <?= number_format($r['PrixJournaliere'], 0, '.', ' ') ?> <span style="font-size: 0.8rem; color: #666;">Ar/semaine</span>
-                            </div>
-                        </div>
-                        <ul style="margin: 16px 0; padding-left: 20px; color: #333; font-size: 0.95rem;">
-                            <li><strong>Viande :</strong> <?= (float)$r['Viande'] ?>%</li>
-                            <li><strong>Poisson :</strong> <?= (float)$r['Poisson'] ?>%</li>
-                            <li><strong>Volaille :</strong> <?= (float)$r['Volailles'] ?>%</li>
-                        </ul>
-                        <form action="<?= base_url('dashboard/select-regime/' . (int) $r['Id']) ?>" method="post" style="margin: 0;">
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="regime_id" value="<?= (int) $r['Id'] ?>">
-                            <button type="submit" style="width: 100%; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Choisir ce régime</button>
-                        </form>
-                    </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666;">Aucun régime suggéré pour le moment.</p>
-                <?php endif; ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
+                <div style="background: linear-gradient(135deg, rgba(47,143,81,0.1), rgba(79,191,122,0.1)); padding: 16px; border-radius: 10px; border-left: 4px solid #2f8f51;">
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Poids Initial</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #2f8f51;"><?= !empty($stats['poidsInitial']) ? $stats['poidsInitial'] : '-' ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(47,143,81,0.1), rgba(79,191,122,0.1)); padding: 16px; border-radius: 10px; border-left: 4px solid #2f8f51;">
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Poids Actuel</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #2f8f51;"><?= !empty($stats['poidsCurrent']) ? $stats['poidsCurrent'] : '-' ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(231,76,60,0.1), rgba(241,196,15,0.1)); padding: 16px; border-radius: 10px; border-left: 4px solid #e74c3c;">
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Poids Perdu</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #e74c3c;"><?= $stats['poidsPerte'] ?> <span style="font-size: 0.9rem; color: #999;">kg</span></div>
+                </div>
             </div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="dashboard-link" data-section="graph" style="flex: 1; padding: 12px; background: #e5e7eb; color: #1f2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">← Retour au graphique</button>
-                <button class="dashboard-link" data-section="sports" style="flex: 1; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Voir les sports →</button>
+
+            <div style="background: #fafafa; padding: 16px; border-radius: 10px; margin-bottom: 30px;">
+                <h4 style="margin: 0 0 16px; color: #333;">📊 Distribution IMC</h4>
+                <div style="display: flex; align-items: center; gap: 40px;">
+                    <div style="flex: 1; height: 300px; position: relative;">
+                        <canvas id="imcDistributionChart"></canvas>
+                    </div>
+                    <div style="flex: 0 0 auto; text-align: center; padding: 20px; background: #fff; border-radius: 10px; border: 2px solid #ddd;">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 12px;">Vous actuellement</div>
+                        <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 12px; color: <?php 
+                            $currentIMC = $stats['imcCurrent'] ?? 0;
+                            echo ($currentIMC < 18.5) ? '#3498db' : (($currentIMC < 25) ? '#2f8f51' : (($currentIMC < 30) ? '#f39c12' : '#e74c3c'));
+                        ?>;"><?= $currentIMC ?></div>
+                        <div style="font-size: 0.85rem; padding: 8px 12px; border-radius: 6px; background: <?php 
+                            $currentIMC = $stats['imcCurrent'] ?? 0;
+                            echo ($currentIMC < 18.5) ? '#d6eaf8' : (($currentIMC < 25) ? '#e8f5e9' : (($currentIMC < 30) ? '#fff3e0' : '#ffebee'));
+                        ?>; color: <?php 
+                            $currentIMC = $stats['imcCurrent'] ?? 0;
+                            echo ($currentIMC < 18.5) ? '#3498db' : (($currentIMC < 25) ? '#2f8f51' : (($currentIMC < 30) ? '#f39c12' : '#e74c3c'));
+                        ?>; font-weight: 600;">
+                            <?php 
+                                $currentIMC = $stats['imcCurrent'] ?? 0;
+                                if ($currentIMC < 18.5) {
+                                    echo 'Maigreur (&lt;18.5)';
+                                } elseif ($currentIMC < 25) {
+                                    echo 'Normal (18.5-25)';
+                                } elseif ($currentIMC < 30) {
+                                    echo 'Surpoids (25-30)';
+                                } else {
+                                    echo 'Obésité (&gt;30)';
+                                }
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #fafafa; padding: 16px; border-radius: 10px; margin-bottom: 30px;">
+                <h4 style="margin: 0 0 16px; color: #333;">📊 Tableau Croisé Poids / Taille / IMC</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 500px;">
+                        <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Date</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">Poids (kg)</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">Taille (cm)</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">IMC</th>
+                        </tr>
+                        <?php foreach ($historique as $entry): ?>
+                            <?php if ($entry['DateEvolution'] !== 'Poids initial'): ?>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 12px; color: #555;"><?= htmlspecialchars($entry['DateEvolution']) ?></td>
+                                    <td style="padding: 12px; text-align: center; color: #2f8f51; font-weight: 600;"><?= $entry['Poids'] ?></td>
+                                    <td style="padding: 12px; text-align: center; color: #666;"><?= $currentTaille ?? '-' ?></td>
+                                    <td style="padding: 12px; text-align: center; font-weight: 600; color: <?= ($entry['IMC'] ?? 0) < 25 ? '#2f8f51' : (($entry['IMC'] ?? 0) < 30 ? '#f39c12' : '#e74c3c') ?>;"><?= $entry['IMC'] ?></td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+            </div>
+
+            <div style="background: #fafafa; padding: 16px; border-radius: 10px;">
+                <h4 style="margin: 0 0 16px; color: #333;">📅 Calendrier de Cure</h4>
+                <?php if (!empty($currentRegime)): ?>
+                    <div style="margin-bottom: 16px; padding: 12px; background: #e8f5e9; border-left: 4px solid #2f8f51; border-radius: 6px;">
+                        <div style="font-weight: 600; color: #2f8f51; margin-bottom: 4px;">🍽️ Régime: <?= htmlspecialchars($currentRegime->RegimeNom) ?></div>
+                        <div style="font-size: 0.9rem; color: #555;">
+                            Début: <?= htmlspecialchars($currentRegime->DateDebut) ?> | Durée: <?= htmlspecialchars($currentRegime->DureeEnJours) ?> jours
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($currentSport)): ?>
+                    <div style="margin-bottom: 16px; padding: 12px; background: #e3f2fd; border-left: 4px solid #4fbf7a; border-radius: 6px;">
+                        <div style="font-weight: 600; color: #4fbf7a; margin-bottom: 4px;">⚽ Sport: <?= htmlspecialchars($currentSport->SportNom) ?></div>
+                        <div style="font-size: 0.9rem; color: #555;">
+                            Début: <?= htmlspecialchars($currentSport->DateDebut) ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <div style="overflow-x: auto; padding-top: 16px;">
+                    <div style="display: flex; gap: 8px; min-width: max-content;">
+                        <?php 
+                            $dateDebut = null;
+                            $nbJours = 90;
+                            
+                            if (!empty($currentRegime)) {
+                                $dateDebut = new DateTime($currentRegime->DateDebut);
+                                $nbJours = (int) $currentRegime->DureeEnJours;
+                            } else {
+                                $dateDebut = new DateTime('now');
+                                $dateDebut->modify('-30 days');
+                            }
+                            
+                            $evolutionDates = array_map(function($e) { return $e['DateEvolution'] ?? null; }, $historique);
+                            
+                            for ($i = 0; $i < $nbJours; $i++) {
+                                $currentDate = (clone $dateDebut)->modify("+{$i} days");
+                                $dateStr = $currentDate->format('Y-m-d');
+                                $hasEntry = in_array($dateStr, $evolutionDates);
+                                $isToday = $dateStr === date('Y-m-d');
+                        ?>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <div style="width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; background: <?= $hasEntry ? '#4fbf7a' : '#f0f0f0' ?>; color: <?= $hasEntry ? '#fff' : '#999' ?>; border: <?= $isToday ? '2px solid #2f8f51' : 'none' ?>; position: relative;">
+                                    <?= $hasEntry ? '✓' : $currentDate->format('d') ?>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #999; text-align: center; width: 40px;">
+                                    <?= $currentDate->format('M') ?>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== SECTION 3: SPORTS ===== -->
-    <section id="sports" class="dashboard-section">
-        <div>
-            <h2 style="margin: 0 0 20px; color: #2f8f51; font-size: 1.4rem;">Sports recommandés</h2>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                <?php if (!empty($sports)): ?>
-                    <?php foreach ($sports as $s): ?>
-                    <div style="background: linear-gradient(180deg, #fff, #fbfdff); border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(14,20,30,0.06); border: 1px solid rgba(15,23,42,0.10); border-top: 4px solid #4fbf7a;">
-                        <h4 style="margin: 0 0 12px; color: #0b1720; font-size: 1.1rem;"><?= htmlspecialchars($s['SportNom'] ?? '') ?></h4>
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 2rem; font-weight: 800; color: #2f8f51;">
-                                <?= (float) ($s['EfficacitePoids'] ?? 0) ?> <span style="font-size: 0.8rem; color: #666;">kg/semaine</span>
-                            </div>
-                        </div>
-                        <ul style="margin: 16px 0; padding-left: 20px; color: #333; font-size: 0.95rem;">
-                            <li><strong>Catégorie :</strong> <?= htmlspecialchars($s['Categorie'] ?? 'N/A') ?></li>
-                        </ul>
-                        <form action="<?= base_url('dashboard/select-sport/' . (int) $s['Id']) ?>" method="post" style="margin: 0;">
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="sport_id" value="<?= (int) $s['Id'] ?>">
-                            <button type="submit" style="width: 100%; padding: 12px; background: linear-gradient(90deg, #4fbf7a, #6bd188); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Sélectionner</button>
-                        </form>
-                    </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p style="color: #666;">Aucun sport suggéré pour le moment.</p>
-                <?php endif; ?>
-            </div>
-
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="dashboard-link" data-section="regimes" style="flex: 1; padding: 12px; background: #e5e7eb; color: #1f2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">← Retour aux régimes</button>
-                <a href="/myhome" style="flex: 1; padding: 12px; background: linear-gradient(90deg, #2f8f51, #4fbf7a); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none;">Retour à l'accueil</a>
-            </div>
-        </div>
-    </section>
 
 </main>
 
 <?php echo view('partials/Footer'); ?>
 
-<script>
-    // Navigation vers sections avec scroll fluide
-    document.querySelectorAll('.dashboard-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const section = this.getAttribute('data-section');
-            if (section) {
-                e.preventDefault();
-                
-                const targetElement = document.getElementById(section);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    
-                    // Mettre à jour la navigation active
-                    document.querySelectorAll('.dashboard-nav a').forEach(a => a.classList.remove('is-active'));
-                    document.querySelector(`.dashboard-nav a[data-section="${section}"]`)?.classList.add('is-active');
-                }
-            }
-        });
-    });
-
-    // Graphique
-    document.addEventListener("DOMContentLoaded", function() {
-        const canvasElement = document.getElementById('evolutionChart');
-        
-        if (canvasElement) {
-            const ctx = canvasElement.getContext('2d');
-            
-            const labels = <?= json_encode(array_column($historique ?? [], 'DateEvolution')) ?>;
-            const weights = <?= json_encode(array_column($historique ?? [], 'Poids')) ?>;
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Poids (kg)',
-                        data: weights,
-                        borderColor: '#2f8f51',
-                        backgroundColor: 'rgba(47, 143, 81, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 6,
-                        pointBackgroundColor: '#2f8f51',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: false,
-                            grid: { color: 'rgba(47, 143, 81, 0.05)' }
-                        },
-                        x: { 
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Marquer la première section comme active au chargement
-        document.querySelector('.dashboard-nav a:first-child')?.classList.add('is-active');
-    });
-</script>
+<script type="application/json" id="dashboardChartData"><?= json_encode([
+    'labels' => array_column($historique ?? [], 'DateEvolution'),
+    'weights' => array_column($historique ?? [], 'Poids'),
+    'imcs' => array_column($historique ?? [], 'IMC'),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>
+<script defer src="/assets/js/dashboard.js"></script>
 
 </body>
 </html>

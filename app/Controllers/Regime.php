@@ -123,6 +123,7 @@ class Regime extends BaseController
             'weight' => $weight,
             'height' => $height,
             'duration_months' => $this->request->getPost('duration_months'),
+            'payment_type' => $this->request->getPost('payment_type'),
             'selected_regime_id' => $this->request->getPost('selected_regime_id'),
             'selected_sport_id' => $this->request->getPost('sport_id'),
             'sport_id' => $this->request->getPost('sport_id'),

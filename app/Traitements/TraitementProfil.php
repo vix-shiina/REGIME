@@ -313,11 +313,28 @@ class TraitementProfil
             $userInfoId = $stmt->fetchColumn();
 
             if ($userInfoId) {
+                // Get the old poids value to check if this is the first time setting it
+                $getOldPoids = $this->pdo->prepare('SELECT Poids FROM UserInfo WHERE UserId = ?');
+                $getOldPoids->execute([$userId]);
+                $oldPoids = $getOldPoids->fetchColumn();
+                
                 $updateInfo = $this->pdo->prepare('UPDATE UserInfo SET Age = ?, Taille = ?, Poids = ? WHERE UserId = ?');
                 $updateInfo->execute([$ageValue, $tailleValue, $poidsValue, $userId]);
+                
+                // If poids is being set for the first time (was null/empty) and now has a value, insert into Evolution
+                if ((empty($oldPoids) || $oldPoids === null) && !empty($poidsValue)) {
+                    $insertEvolution = $this->pdo->prepare('INSERT INTO Evolution (UserId, Poids, DateEvolution) VALUES (?, ?, ?)');
+                    $insertEvolution->execute([$userId, $poidsValue, date('Y-m-d')]);
+                }
             } else {
                 $insertInfo = $this->pdo->prepare('INSERT INTO UserInfo (UserId, Age, Taille, Poids) VALUES (?, ?, ?, ?)');
                 $insertInfo->execute([$userId, $ageValue, $tailleValue, $poidsValue]);
+                
+                // If poids is set when creating UserInfo, insert into Evolution
+                if (!empty($poidsValue)) {
+                    $insertEvolution = $this->pdo->prepare('INSERT INTO Evolution (UserId, Poids, DateEvolution) VALUES (?, ?, ?)');
+                    $insertEvolution->execute([$userId, $poidsValue, date('Y-m-d')]);
+                }
             }
 
             $this->pdo->commit();

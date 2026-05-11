@@ -242,3 +242,23 @@ body {
         padding-top: 68px;
     }
 }
+
+.promo-ticker {
+        background: linear-gradient(90deg, #2f8f51, #4fbf7a);
+        color: #fff;
+        padding: 12px 0;
+        overflow: hidden;
+        font-weight: 600;
+    }
+    .promo-ticker-content {
+        display: flex;
+        white-space: nowrap;
+    }
+    .promo-ticker-item {
+        padding: 0 40px;
+        display: inline-block;
+        min-width: max-content;
+    }
+    .promo-ticker-content:hover {
+        animation-play-state: paused;
+    }

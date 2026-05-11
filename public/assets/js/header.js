@@ -49,3 +49,37 @@ document.addEventListener('DOMContentLoaded', function(){
         oscillators = [];
     }
 });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const content = document.querySelector('.promo-ticker-content');
+        if (content) {
+            const item = content.querySelector('.promo-ticker-item');
+            if (item) {
+                // Dupliquer le contenu 4 fois pour combler tous les vides
+                for (let i = 0; i < 4; i++) {
+                    const clone = item.cloneNode(true);
+                    content.appendChild(clone);
+                }
+                
+                // Animation JavaScript continue sans interruption
+                let offset = 0;
+                const itemWidth = item.offsetWidth;
+                const speed = 1; // pixels par frame
+                
+                function animate() {
+                    offset += speed;
+                    
+                    // Quand on a scrollé la moitié, revenir au début instantanément
+                    if (offset >= itemWidth) {
+                        offset = 0;
+                    }
+                    
+                    content.style.transform = `translateX(-${offset}px)`;
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+            }
+        }
+    });

@@ -40,6 +40,7 @@
                 if (String(step) === 'perso-4') populatePersoResume();
                 if (String(step) === 'conseil-4') computeConseilSuggestion();
                 if (String(step) === 'perso-5') computePersoSuggestion();
+                if (String(step) === '0.5') updateModeChoiceDisplay();
             } catch (err) {
                 // ignore resume/suggestion errors
                 console.warn('resume/suggestion populate error', err);
@@ -113,6 +114,7 @@
         modeChoiceRadios.forEach(radio => {
             radio.addEventListener('change', updateModeChoiceDisplay);
         });
+        updateModeChoiceDisplay();
 
         // Handle validateModeBtn click - navigate to the selected mode's first step
         if (validateModeBtn) {
@@ -427,10 +429,73 @@
             return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
         }
 
+        function formatDelta(value) {
+            const n = toNum(value);
+            if (isNaN(n)) return 'Non précisé';
+            const abs = Math.abs(n);
+            const sign = n > 0 ? '+' : (n < 0 ? '-' : '');
+            return `${sign}${abs.toFixed(1)}`;
+        }
+
+        function estimateImc(weight, heightCm) {
+
+        function capTheoreticalDelta(delta, currentWeight) {
+            const d = toNum(delta);
+            const w = toNum(currentWeight);
+            if (isNaN(d)) return NaN;
+            if (isNaN(w) || w <= 0) return d;
+
+            const maxChange = Math.max(3, w * 0.25);
+            return Math.max(-maxChange, Math.min(maxChange, d));
+        }
+            const w = toNum(weight);
+            const h = toNum(heightCm);
+            if (isNaN(w) || isNaN(h) || h <= 0) return NaN;
+            const m = h / 100;
+            return w / (m * m);
+        }
+
         function defaultWeeklyFreq(goal) {
             if (goal === 'gain') return 4;
             if (goal === 'loss') return 5;
             return 3;
+        }
+
+        function goalTargetBmi(goal) {
+            if (goal === 'gain') return 21.0;
+            if (goal === 'loss') return 22.5;
+            return 22.0;
+        }
+
+        function chooseRegimeForGoal(goal, regimes) {
+            if (!regimes.length) {
+                return { regime: null, adapted: false };
+            }
+
+            const targeted = regimes.filter(r => {
+                const regimeType = pickField(r, ['TypeDeRegimeId', 'type_id', 'typeId'], pickField(r, ['TypeDeRegime', 'type', 'typeLabel']));
+                return regimeTypeToGoal(regimeType) === goal;
+            });
+
+            const pool = targeted.length ? targeted : regimes;
+            const regime = pool.reduce((best, item) => {
+                const currentEfficacy = toNum(pickField(item, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0;
+                const bestEfficacy = best ? (toNum(pickField(best, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0) : -1;
+                if (!best) return item;
+                return currentEfficacy > bestEfficacy ? item : best;
+            }, null);
+
+            return {
+                regime,
+                adapted: targeted.length > 0,
+            };
+        }
+
+        function estimateDurationWeeks(deltaKg, weeklyImpact) {
+            const delta = Math.abs(toNum(deltaKg));
+            const impact = Math.max(0.1, toNum(weeklyImpact));
+            if (isNaN(delta) || delta <= 0) return 0;
+            return Math.max(1, delta / impact);
         }
 
         function formatRegimeDetails(regime, durationMonths) {
@@ -528,6 +593,19 @@
             `;
         }
 
+        function renderTheoryHtml(items) {
+            return `
+                <section class="suggestion-section suggestion-section-full">
+                    <h4>Théorique</h4>
+                    <div class="suggestion-card">
+                        <ul>
+                            ${items.map(item => `<li><strong>${item.label} :</strong> ${item.value}</li>`).join('')}
+                        </ul>
+                    </div>
+                </section>
+            `;
+        }
+
         function renderDetailsHtml(items) {
             return `
                 <section class="suggestion-section suggestion-section-full">
@@ -539,21 +617,6 @@
                     </div>
                 </section>
             `;
-        }
-
-        function selectBestRegime(goal, regimes) {
-            if (!regimes.length) return null;
-            const targeted = regimes.filter(r => {
-                const regimeType = pickField(r, ['TypeDeRegimeId', 'type_id', 'typeId'], pickField(r, ['TypeDeRegime', 'type', 'typeLabel']));
-                return regimeTypeToGoal(regimeType) === goal;
-            });
-            const pool = targeted.length ? targeted : regimes;
-            return pool.reduce((best, regime) => {
-                const currentEfficacy = toNum(pickField(regime, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0;
-                const bestEfficacy = best ? (toNum(pickField(best, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0) : -1;
-                if (!best) return regime;
-                return currentEfficacy > bestEfficacy ? regime : best;
-            }, null);
         }
 
         function selectBestSport(goal, sports) {
@@ -579,7 +642,9 @@
             const regimes = initial.regimes || [];
             const sports = initial.sports || [];
 
-            const bmi = computeBmi() || toNum(imcValue2?.textContent);
+            const weight = toNum(document.getElementById('weightInput')?.value);
+            const height = toNum(document.getElementById('heightInput')?.value);
+            const bmi = estimateImc(weight, height) || toNum(imcValue2?.textContent);
             const months = getConseilDurationMonths();
             const sport = getSportChoice('conseil');
 
@@ -589,10 +654,31 @@
                 else if (bmi >= 25) goal = 'loss';
             }
 
-            const bestRegime = selectBestRegime(goal, regimes);
+            const regimeChoice = chooseRegimeForGoal(goal, regimes);
+            const bestRegime = regimeChoice.regime;
             const selectedRegime = bestRegime ? formatRegimeDetails(bestRegime, isNaN(months) ? null : months) : null;
             const bestSport = sport.add ? selectBestSport(goal, sports) : null;
             const sportInfo = sport.add ? formatSportDetails(bestSport || {}, sport.freq || defaultWeeklyFreq(goal)) : null;
+            const durationWeeks = isNaN(months) ? 0 : months * 4.33;
+            const regimeWeeklyImpact = toNum(pickField(bestRegime || {}, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0;
+            const sportWeeklyImpact = sport.add ? ((toNum(pickField(bestSport || {}, ['EfficacitePoidsParSceance', 'efficacite', 'efficiency'])) || 0) * (sport.freq || defaultWeeklyFreq(goal)) * 0.15) : 0;
+            const theoreticalImpact = (regimeWeeklyImpact + sportWeeklyImpact) * durationWeeks;
+            const rawDelta = goal === 'gain' ? theoreticalImpact : goal === 'loss' ? -theoreticalImpact : 0;
+            const theoreticalDelta = capTheoreticalDelta(rawDelta, weight);
+            const projectedWeight = !isNaN(weight) ? Math.max(0, weight + theoreticalDelta) : NaN;
+            const projectedImc = estimateImc(projectedWeight, height);
+            const currentWeightLabel = isNaN(weight) ? 'Non précisé' : `${weight.toFixed(1)} kg`;
+            const currentImcLabel = isNaN(bmi) ? 'Non précisé' : bmi.toFixed(1);
+            const projectedWeightLabel = isNaN(projectedWeight) ? 'Non précisé' : `${projectedWeight.toFixed(1)} kg`;
+            const projectedImcLabel = isNaN(projectedImc) ? 'Non précisé' : projectedImc.toFixed(1);
+            const theoryLabel = goal === 'gain' ? `Gain théorique de ${formatDelta(theoreticalDelta)} kg` : goal === 'loss' ? `Perte théorique de ${formatDelta(theoreticalDelta)} kg` : 'Évolution théorique nulle';
+            const adaptedNotice = regimeChoice.adapted
+                ? ''
+                : `<div class="suggestion-summary" style="margin-top:14px;background:#fff8e6;border:1px solid rgba(243,156,18,.22)"><h4>Aucune cure adaptée</h4><p>Nous n'avons pas trouvé de cure correspondant exactement à vos critères. Voici une alternative avec une durée conseillée pour atteindre votre objectif.</p></div>`;
+            const alternativeDuration = estimateDurationWeeks(
+                goal === 'gain' ? Math.max(0, (goalTargetBmi(goal) * ((height / 100) ** 2)) - weight) : Math.max(0, weight - (goalTargetBmi(goal) * ((height / 100) ** 2))),
+                regimeWeeklyImpact + sportWeeklyImpact
+            );
 
             syncSelectedRegime(bestRegime);
             syncSelectedSport(bestSport, sport.freq || defaultWeeklyFreq(goal), sport.add);
@@ -611,6 +697,7 @@
                 <div class="suggestion-result">
                     <h3>Régime conseillé</h3>
                     <p>Voici le régime retenu depuis la base selon votre IMC et vos critères.</p>
+                    ${adaptedNotice}
                     ${renderSummaryHtml([
                         { label: 'Objectif', value: goal === 'gain' ? 'Prise de poids' : goal === 'loss' ? 'Perte de poids' : 'Maintien' },
                         { label: 'Durée', value: isNaN(months) ? 'Non précisée' : `${months} mois` },
@@ -619,8 +706,13 @@
                     <div class="suggestion-sections">
                         ${renderRegimeHtml(selectedRegime)}
                         ${sport.add ? renderSportHtml(sportInfo) : renderNoSportHtml()}
-                        ${renderDetailsHtml([
-                            { label: 'IMC actuel', value: isNaN(bmi) ? 'Non précisé' : bmi.toFixed(1) },
+                        ${renderTheoryHtml([
+                            { label: 'Poids actuel', value: currentWeightLabel },
+                            { label: 'IMC actuel', value: currentImcLabel },
+                            { label: 'Projection poids', value: projectedWeightLabel },
+                            { label: 'Projection IMC', value: projectedImcLabel },
+                            { label: 'Résultat théorique', value: theoryLabel },
+                            { label: 'Durée conseillée si aucune cure adaptée', value: `${alternativeDuration.toFixed(1)} semaine(s)` },
                             { label: 'Fréquence hebdo', value: sport.add ? `${sportInfo.weeklyFreq} séance(s)/semaine` : '0 séance/semaine' },
                         ])}
                     </div>
@@ -655,10 +747,33 @@
 
             syncCustomTarget(unit, targetVal);
 
-            const bestRegime = selectBestRegime(goal, regimes);
+            const regimeChoice = chooseRegimeForGoal(goal, regimes);
+            const bestRegime = regimeChoice.regime;
             const selectedRegime = bestRegime ? formatRegimeDetails(bestRegime, isNaN(months) ? null : months) : null;
             const bestSport = sport.add ? selectBestSport(goal, sports) : null;
             const sportInfo = sport.add ? formatSportDetails(bestSport || {}, sport.freq || defaultWeeklyFreq(goal)) : null;
+            const durationWeeks = isNaN(months) ? 0 : months * 4.33;
+            const regimeWeeklyImpact = toNum(pickField(bestRegime || {}, ['EfficacitePoidsParSemaine', 'efficacite', 'efficiency'])) || 0;
+            const sportWeeklyImpact = sport.add ? ((toNum(pickField(bestSport || {}, ['EfficacitePoidsParSceance', 'efficacite', 'efficiency'])) || 0) * (sport.freq || defaultWeeklyFreq(goal)) * 0.15) : 0;
+            const theoreticalImpact = (regimeWeeklyImpact + sportWeeklyImpact) * durationWeeks;
+            const rawDelta = goal === 'gain' ? theoreticalImpact : goal === 'loss' ? -theoreticalImpact : 0;
+            const theoreticalDelta = capTheoreticalDelta(rawDelta, currentWeight);
+            const projectedWeight = !isNaN(currentWeight) ? Math.max(0, currentWeight + theoreticalDelta) : (isNaN(targetKg) ? NaN : targetKg);
+            const currentImc = estimateImc(currentWeight, height);
+            const projectedImc = estimateImc(projectedWeight, height);
+            const currentWeightLabel = isNaN(currentWeight) ? 'Non précisé' : `${currentWeight.toFixed(1)} kg`;
+            const currentImcLabel = isNaN(currentImc) ? 'Non précisé' : currentImc.toFixed(1);
+            const projectedWeightLabel = isNaN(projectedWeight) ? 'Non précisé' : `${projectedWeight.toFixed(1)} kg`;
+            const projectedImcLabel = isNaN(projectedImc) ? 'Non précisé' : projectedImc.toFixed(1);
+            const theoryLabel = goal === 'gain' ? `Gain théorique de ${formatDelta(theoreticalDelta)} kg` : goal === 'loss' ? `Perte théorique de ${formatDelta(theoreticalDelta)} kg` : 'Évolution théorique nulle';
+            const adaptedNotice = regimeChoice.adapted
+                ? ''
+                : `<div class="suggestion-summary" style="margin-top:14px;background:#fff8e6;border:1px solid rgba(243,156,18,.22)"><h4>Aucune cure adaptée</h4><p>Nous n'avons pas trouvé de cure correspondant exactement à vos critères. Voici une alternative avec une durée conseillée pour atteindre votre objectif.</p></div>`;
+            const targetReferenceWeight = !isNaN(targetKg) ? targetKg : (goal === 'gain' ? Math.max(currentWeight, currentWeight + Math.abs(theoreticalDelta)) : Math.max(0, currentWeight - Math.abs(theoreticalDelta)));
+            const alternativeDuration = estimateDurationWeeks(
+                !isNaN(currentWeight) && !isNaN(targetReferenceWeight) ? Math.abs(targetReferenceWeight - currentWeight) : 0,
+                regimeWeeklyImpact + sportWeeklyImpact
+            );
 
             syncSelectedRegime(bestRegime);
             syncSelectedSport(bestSport, sport.freq || defaultWeeklyFreq(goal), sport.add);
@@ -678,16 +793,22 @@
                 <div class="suggestion-result">
                     <h3>Régime personnalisé conseillé</h3>
                     <p>Régime sélectionné depuis la base selon votre objectif, votre durée et votre poids actuel.</p>
+                    ${adaptedNotice}
                     ${renderSummaryHtml([
-                        { label: 'Poids actuel', value: isNaN(currentWeight) ? 'Non précisé' : `${currentWeight} kg` },
+                        { label: 'Poids actuel', value: currentWeightLabel },
                         { label: 'Objectif cible', value: unit === 'weight' ? (isNaN(targetVal) ? 'Non précisé' : `${targetVal} kg`) : isNaN(targetVal) ? 'Non précisé' : `IMC ${targetVal}` },
                         { label: 'Durée', value: isNaN(months) ? 'Non précisée' : `${months} mois` },
                     ])}
                     <div class="suggestion-sections">
                         ${renderRegimeHtml(selectedRegime)}
                         ${sport.add ? renderSportHtml(sportInfo) : renderNoSportHtml()}
-                        ${renderDetailsHtml([
-                            { label: 'Objectif', value: goal === 'gain' ? 'Prise de poids' : goal === 'loss' ? 'Perte de poids' : 'Maintien' },
+                        ${renderTheoryHtml([
+                            { label: 'IMC actuel', value: currentImcLabel },
+                            { label: 'Poids actuel', value: currentWeightLabel },
+                            { label: 'IMC fin de cure', value: projectedImcLabel },
+                            { label: 'Poids fin de cure', value: projectedWeightLabel },
+                            { label: 'Résultat théorique', value: theoryLabel },
+                            { label: 'Durée conseillée si aucune cure adaptée', value: `${alternativeDuration.toFixed(1)} semaine(s)` },
                             { label: 'Fréquence hebdo', value: sport.add ? `${sportInfo.weeklyFreq} séance(s)/semaine` : '0 séance/semaine' },
                         ])}
                     </div>
@@ -699,6 +820,7 @@
         // Sport frequency toggles
         // Conseil branch
         const conseilFreqLabel = document.getElementById('conseilFreqLabel');
+        const conseilFreqValue = document.getElementById('conseilFreqValue');
         
         const conseilAddSportRadios = document.querySelectorAll('input[name="conseilAddSport"]');
         function updateConseilSportDisplay() {
@@ -720,13 +842,17 @@
         });
         const conseilFreqRange = document.getElementById('conseilFreqRange');
         if (conseilFreqRange) {
+            if (!conseilFreqRange.value) conseilFreqRange.value = '1';
+            if (conseilFreqValue) conseilFreqValue.textContent = conseilFreqRange.value;
             conseilFreqRange.addEventListener('input', () => {
+                if (conseilFreqValue) conseilFreqValue.textContent = conseilFreqRange.value;
                 if (selectedSportFrequencyInput) selectedSportFrequencyInput.value = String(conseilFreqRange.value || 0);
             });
         }
 
         // Perso branch
         const persoFreqLabel = document.getElementById('persoFreqLabel');
+        const persoFreqValue = document.getElementById('persoFreqValue');
         
         const persoAddSportRadios = document.querySelectorAll('input[name="persoAddSport"]');
         function updatePersoSportDisplay() {
@@ -748,7 +874,10 @@
         });
         const persoFreqRange = document.getElementById('persoFreqRange');
         if (persoFreqRange) {
+            if (!persoFreqRange.value) persoFreqRange.value = '1';
+            if (persoFreqValue) persoFreqValue.textContent = persoFreqRange.value;
             persoFreqRange.addEventListener('input', () => {
+                if (persoFreqValue) persoFreqValue.textContent = persoFreqRange.value;
                 if (selectedSportFrequencyInput) selectedSportFrequencyInput.value = String(persoFreqRange.value || 0);
             });
         }
