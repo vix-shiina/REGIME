@@ -15,6 +15,7 @@
 <?php
 
 $currentRegime = $currentRegime ?? [];
+$user = $user ?? [];
 
 $regimeName = (string) ($currentRegime['RegimeNom'] ?? 'Mon régime');
 $type = (string) ($currentRegime['TypeDeRegime'] ?? '-');
@@ -154,6 +155,36 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
         <article class="regime-card">
 
             <h2>
+                Identité
+            </h2>
+
+            <div class="regime-row">
+                <span>Nom</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Nom'] ?? '-')); ?></strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Prénom</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Prenom'] ?? '-')); ?></strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Âge</span>
+                <strong>
+                    <?php echo !empty($user['Age']) ? htmlspecialchars((string) $user['Age']) . ' ans' : '-'; ?>
+                </strong>
+            </div>
+
+            <div class="regime-row">
+                <span>Genre</span>
+                <strong><?php echo htmlspecialchars((string) ($user['Genre'] ?? '-')); ?></strong>
+            </div>
+
+        </article>
+
+        <article class="regime-card">
+
+            <h2>
                 Informations générales
             </h2>
 
@@ -234,22 +265,74 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
         <article class="regime-card">
 
             <h2>
-                Identifiants
+                Objectifs de poids
             </h2>
 
             <div class="regime-row">
-                <span>ID régime</span>
+                <span>Poids de départ</span>
                 <strong>
-                    <?php echo htmlspecialchars((string) ($currentRegime['RegimeId'] ?? '-')); ?>
+                    <?php echo !empty($currentRegime['PoidsDepart']) 
+                        ? htmlspecialchars((string) $currentRegime['PoidsDepart']) . ' kg'
+                        : (!empty($currentRegime['PoidsActuel']) ? htmlspecialchars((string) $currentRegime['PoidsActuel']) . ' kg' : '-'); ?>
                 </strong>
             </div>
 
             <div class="regime-row">
-                <span>ID affectation</span>
+                <span>Poids théorique perdu à partir de la cure</span>
                 <strong>
-                    <?php echo htmlspecialchars((string) ($currentRegime['RegimeUserId'] ?? '-')); ?>
+                    <?php 
+                        if (!empty($currentRegime['EfficacitePoidsParSemaine']) && !empty($durationDays)) {
+                            $semaines = $durationDays / 7;
+                            $poidsPerdu = (float) $currentRegime['EfficacitePoidsParSemaine'] * $semaines;
+                            echo htmlspecialchars((string) round($poidsPerdu, 2)) . ' kg';
+                        } else {
+                            echo '-';
+                        }
+                    ?>
                 </strong>
             </div>
+
+        </article>
+
+        <article class="regime-card">
+
+            <h2>
+                Sport
+            </h2>
+
+            <?php if (!empty($currentRegime['SportNom'])): ?>
+                <div class="regime-row">
+                    <span>Nom du sport</span>
+                    <strong>
+                        <?php echo htmlspecialchars((string) $currentRegime['SportNom']); ?>
+                    </strong>
+                </div>
+
+                <div class="regime-row">
+                    <span>Type de sport</span>
+                    <strong>
+                        <?php echo htmlspecialchars((string) ($currentRegime['TypeDeSport'] ?? '-')); ?>
+                    </strong>
+                </div>
+
+                <div class="regime-row">
+                    <span>Efficacité (poids/séance)</span>
+                    <strong>
+                        <?php echo isset($currentRegime['EfficacitePoidsParSceance']) 
+                            ? htmlspecialchars((string) $currentRegime['EfficacitePoidsParSceance']) 
+                            : '-'; ?>
+                    </strong>
+                </div>
+
+                <div class="regime-row">
+                    <span>Durée</span>
+                    <strong>
+                        <?php echo htmlspecialchars((string) ($currentRegime['SportDureeEnJours'] ?? '-')) . ' jours'; ?>
+                    </strong>
+                </div>
+            <?php else: ?>
+                <p class="muted">Aucun sport sélectionné.</p>
+            <?php endif; ?>
 
         </article>
 
@@ -257,6 +340,9 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 
     <section class="regime-actions">
 
+        <button class="regime-btn primary" type="button" onclick="window.print()">
+            Imprimer en PDF
+        </button>
 
         <a class="regime-btn secondary" href="/profil">
             Retour profil
@@ -267,6 +353,15 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 </main>
 
 <?php echo view('partials/Footer'); ?>
+
+<script>
+(function () {
+    const title = <?php echo json_encode($regimeName . ' - Mon régime', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    window.addEventListener('beforeprint', () => {
+        document.title = title;
+    });
+})();
+</script>
 
 </body>
 </html>

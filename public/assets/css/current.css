@@ -222,3 +222,43 @@ body {
     }
 
 }
+
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    html, body {
+        background: #fff !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .site-header,
+    .site-footer,
+    .regime-actions,
+    .no-print {
+        display: none !important;
+    }
+
+    .regime-current-page {
+        max-width: none;
+        padding: 0;
+    }
+
+    .regime-top-card,
+    .regime-card {
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .regime-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
