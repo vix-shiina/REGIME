@@ -757,9 +757,10 @@ class Model extends BaseModel
             $this->checkBuilderMethod($name);
 
             $result = $builder->{$name}(...$params);
-        } else {
-            throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $name);
-        }
+         }
+        // else {
+        //     throw new BadMethodCallException('Call to undefined method ' . static::class . '::' . $name);
+        // }
 
         if ($result instanceof BaseBuilder) {
             return $this;
