@@ -345,9 +345,9 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 
     <section class="regime-actions">
 
-        <button class="regime-btn primary" type="button" onclick="window.print()">
-            Imprimer en PDF
-        </button>
+        <a class="regime-btn primary" href="/regime/pdf">
+            Télécharger le PDF
+        </a>
 
         <a class="regime-btn secondary" href="/profil">
             Retour profil
@@ -358,15 +358,6 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
 </main>
 
 <?php echo view('partials/Footer'); ?>
-
-<script>
-(function () {
-    const title = <?php echo json_encode($regimeName . ' - Mon régime', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-    window.addEventListener('beforeprint', () => {
-        document.title = title;
-    });
-})();
-</script>
 
 </body>
 </html>
