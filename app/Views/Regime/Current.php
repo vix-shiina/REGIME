@@ -256,7 +256,7 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
             <div class="regime-row">
                 <span>Efficacité / semaine</span>
                 <strong>
-                    <?php echo $efficacyWeekly !== null ? htmlspecialchars((string) $efficacyWeekly) : '-'; ?>
+                    <?php echo $efficacyWeekly !== null ? htmlspecialchars((string) $efficacyWeekly) . ' kg/semaine' : '-'; ?>
                 </strong>
             </div>
 
@@ -319,7 +319,7 @@ $estimatedTotal = ($priceDailyValue !== null && $durationDays > 0)
                     <span>Efficacité (poids/séance)</span>
                     <strong>
                         <?php echo isset($currentRegime['EfficacitePoidsParSceance']) 
-                            ? htmlspecialchars((string) $currentRegime['EfficacitePoidsParSceance']) 
+                            ? htmlspecialchars((string) $currentRegime['EfficacitePoidsParSceance']) . ' kg/séance'
                             : '-'; ?>
                     </strong>
                 </div>
