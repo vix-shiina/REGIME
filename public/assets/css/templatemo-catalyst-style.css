@@ -399,8 +399,14 @@ img {
 .dashboard-body {
     padding: 20px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .dashboard-body {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .dash-stat-card {
@@ -760,6 +766,12 @@ img {
 /* ===== SECTION 4: PRICING ===== */
 .pricing {
     padding: clamp(48px, 6vw, 80px) 0;
+}
+
+/* ===== SECTION 4b: SPORTS ===== */
+.sports {
+    padding: clamp(48px, 6vw, 80px) 0;
+    border-top: 1px solid var(--border);
 }
 
 .toggle-wrap {
