@@ -33,6 +33,7 @@ $sports = $sports ?? [];
             <input type="hidden" name="sport_frequency" id="selectedSportFrequency" value="0">
             <input type="hidden" name="target_unit" id="targetUnitHidden" value="">
             <input type="hidden" name="target_value" id="targetValueHidden" value="">
+            <input type="hidden" name="payment_type" id="paymentTypeHidden" value="">
 
             <!-- ÉTAPE 0 (pas comptée) : Poids + Taille -->
             <section class="wizard-panel is-visible" data-step="0">
@@ -356,8 +357,8 @@ $sports = $sports ?? [];
                         <label>
                             <span>Mode de paiement</span>
                             <select id="conseilPaymentSelect">
-                                <option value="single">Payer en 1 fois</option>
-                                <option value="gold">Devenir client Gold</option>
+                                <option value="Paiement unique">Payer en 1 fois (Client Gold)</option>
+                                <option value="Abonnement">S'abonner (Plusieurs fois)</option>
                             </select>
                         </label>
                     </div>
@@ -380,8 +381,8 @@ $sports = $sports ?? [];
                         <label>
                             <span>Mode de paiement</span>
                             <select id="persoPaymentSelect">
-                                <option value="single">Payer en 1 fois</option>
-                                <option value="gold">Devenir client Gold</option>
+                                <option value="Paiement unique">Payer en 1 fois (Client Gold)</option>
+                                <option value="Abonnement">S'abonner (Plusieurs fois)</option>
                             </select>
                         </label>
                     </div>

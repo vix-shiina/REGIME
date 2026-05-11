@@ -753,6 +753,23 @@
             });
         }
 
+        // Sync payment select values with hidden input before form submission
+        const paymentTypeHidden = document.getElementById('paymentTypeHidden');
+        const conseilPaymentSelect = document.getElementById('conseilPaymentSelect');
+        const persoPaymentSelect = document.getElementById('persoPaymentSelect');
+        const regimeForm = document.getElementById('regimeForm');
+
+        if (regimeForm) {
+            regimeForm.addEventListener('submit', (e) => {
+                // Determine which payment select is visible
+                if (conseilPaymentSelect && !document.querySelector('[data-step="conseil-5"]')?.hidden) {
+                    if (paymentTypeHidden) paymentTypeHidden.value = conseilPaymentSelect.value || '';
+                } else if (persoPaymentSelect && !document.querySelector('[data-step="perso-6"]')?.hidden) {
+                    if (paymentTypeHidden) paymentTypeHidden.value = persoPaymentSelect.value || '';
+                }
+            });
+        }
+
         // Start at step 0
         showStep('0');
 
