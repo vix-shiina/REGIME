@@ -15,8 +15,119 @@
         const imcAdvice = document.getElementById('imcAdvice');
         const imcValue2 = document.getElementById('imcValue2');
         const imcZone2 = document.getElementById('imcZone2');
+        const wizardForm = document.getElementById('regimeForm');
+        const wizardStorageKey = 'regimeWizardState';
+        let currentStep = '0';
+
+        function saveWizardState(step) {
+            if (!wizardForm || !window.localStorage) return;
+
+            const data = {
+                step: step ?? currentStep,
+                weight: weightInput?.value || '',
+                height: heightInput?.value || '',
+                modeChoice: document.querySelector('input[name="modeChoice"]:checked')?.value || '',
+                mode: document.getElementById('modeInput')?.value || '',
+                durationMonths: document.getElementById('durationMonthsHidden')?.value || '',
+                selectedRegimeId: document.getElementById('selectedRegimeId')?.value || '',
+                sportId: document.getElementById('selectedSportId')?.value || '',
+                sportFrequency: document.getElementById('selectedSportFrequency')?.value || '',
+                targetUnit: document.getElementById('targetUnitHidden')?.value || '',
+                targetValue: document.getElementById('targetValueHidden')?.value || '',
+                paymentType: document.getElementById('paymentTypeHidden')?.value || '',
+                conseilDurationUnit: document.querySelector('input[name="conseilDurationUnit"]:checked')?.value || '',
+                conseilDurationValue: document.getElementById('conseilDurationValue')?.value || '',
+                conseilAddSport: document.querySelector('input[name="conseilAddSport"]:checked')?.value || '',
+                persoDurationUnit: document.querySelector('input[name="persoDurationUnit"]:checked')?.value || '',
+                persoDurationValue: document.getElementById('persoDurationValue')?.value || '',
+                persoTargetUnit: document.querySelector('input[name="persoTargetUnit"]:checked')?.value || '',
+                persoTargetValue: document.getElementById('persoTargetValue')?.value || '',
+                persoAddSport: document.querySelector('input[name="persoAddSport"]:checked')?.value || '',
+            };
+
+            try {
+                window.localStorage.setItem(wizardStorageKey, JSON.stringify(data));
+            } catch (err) {
+                // ignore storage failures
+            }
+        }
+
+        function restoreWizardState() {
+            if (!wizardForm || !window.localStorage) return null;
+
+            try {
+                const raw = window.localStorage.getItem(wizardStorageKey);
+                if (!raw) return null;
+
+                return JSON.parse(raw);
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function applyWizardState(state) {
+            if (!state) return;
+
+            if (weightInput && state.weight) weightInput.value = state.weight;
+            if (heightInput && state.height) heightInput.value = state.height;
+
+            const modeChoice = state.modeChoice || state.mode;
+            if (modeChoice) {
+                const radio = document.querySelector(`input[name="modeChoice"][value="${modeChoice === 'custom' ? 'perso' : modeChoice === 'suggested' ? 'conseil' : modeChoice}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            const setChecked = (selector, value) => {
+                if (!value) return;
+                const radio = document.querySelector(`${selector}[value="${value}"]`);
+                if (radio) radio.checked = true;
+            };
+
+            setChecked('input[name="conseilDurationUnit"]', state.conseilDurationUnit);
+            if (document.getElementById('conseilDurationValue') && state.conseilDurationValue) {
+                document.getElementById('conseilDurationValue').value = state.conseilDurationValue;
+            }
+            setChecked('input[name="conseilAddSport"]', state.conseilAddSport);
+
+            setChecked('input[name="persoDurationUnit"]', state.persoDurationUnit);
+            if (document.getElementById('persoDurationValue') && state.persoDurationValue) {
+                document.getElementById('persoDurationValue').value = state.persoDurationValue;
+            }
+            setChecked('input[name="persoTargetUnit"]', state.persoTargetUnit);
+            if (document.getElementById('persoTargetValue') && state.persoTargetValue) {
+                document.getElementById('persoTargetValue').value = state.persoTargetValue;
+            }
+            setChecked('input[name="persoAddSport"]', state.persoAddSport);
+
+            if (document.getElementById('durationMonthsHidden') && state.durationMonths) {
+                document.getElementById('durationMonthsHidden').value = state.durationMonths;
+            }
+            if (document.getElementById('selectedRegimeId') && state.selectedRegimeId) {
+                document.getElementById('selectedRegimeId').value = state.selectedRegimeId;
+            }
+            if (document.getElementById('selectedSportId') && state.sportId) {
+                document.getElementById('selectedSportId').value = state.sportId;
+            }
+            if (document.getElementById('selectedSportFrequency') && state.sportFrequency) {
+                document.getElementById('selectedSportFrequency').value = state.sportFrequency;
+            }
+            if (document.getElementById('targetUnitHidden') && state.targetUnit) {
+                document.getElementById('targetUnitHidden').value = state.targetUnit;
+            }
+            if (document.getElementById('targetValueHidden') && state.targetValue) {
+                document.getElementById('targetValueHidden').value = state.targetValue;
+            }
+            if (document.getElementById('paymentTypeHidden') && state.paymentType) {
+                document.getElementById('paymentTypeHidden').value = state.paymentType;
+            }
+
+            if (state.step) {
+                currentStep = String(state.step);
+            }
+        }
 
         function showStep(step) {
+            currentStep = String(step);
             // Hide all panels
             panels.forEach(p => {
                 const s = p.getAttribute('data-step');
@@ -41,6 +152,7 @@
                 if (String(step) === 'conseil-4') computeConseilSuggestion();
                 if (String(step) === 'perso-5') computePersoSuggestion();
                 if (String(step) === '0.5') updateModeChoiceDisplay();
+                saveWizardState(step);
             } catch (err) {
                 // ignore resume/suggestion errors
                 console.warn('resume/suggestion populate error', err);
@@ -123,9 +235,11 @@
                 if (selected) {
                     if (selected.value === 'perso') {
                         setWizardMode('custom');
+                        saveWizardState('perso-1');
                         showStep('perso-1');
                     } else if (selected.value === 'conseil') {
                         setWizardMode('suggested');
+                        saveWizardState('conseil-1');
                         showStep('conseil-1');
                     }
                 }
@@ -133,6 +247,12 @@
         }
 
         setWizardMode('custom');
+
+        const restoredState = restoreWizardState();
+        if (restoredState) {
+            applyWizardState(restoredState);
+            showStep(restoredState.step || currentStep || '0');
+        }
 
         // Generic navigation for elements with data-go-step
         document.querySelectorAll('[data-go-step]').forEach(btn => btn.addEventListener('click', () => {
@@ -154,6 +274,9 @@
                     return false;
                 }
             });
+
+            inp.addEventListener('input', () => saveWizardState(currentStep));
+            inp.addEventListener('change', () => saveWizardState(currentStep));
         });
         // Duration unit toggles (radio buttons - show/hide value input based on selection)
         
@@ -162,7 +285,7 @@
         const conseilDurationValueLabel = document.getElementById('conseilDurationValueLabel');
         const conseilDurationValueLabelText = document.getElementById('conseilDurationValueLabelText');
         const conseilDurationValue = document.getElementById('conseilDurationValue');
-        const conseilContinueBtn = document.getElementById('conseilContinueBtn');
+        const conseilDurationContinueBtn = document.getElementById('conseilDurationContinueBtn');
         
         function updateConseilDurationDisplay() {
             const selected = Array.from(conseilDurationRadios).find(r => r.checked);
@@ -176,9 +299,9 @@
                     }
                 }
                 // enable continue only when a valid number is entered
-                if (conseilContinueBtn) {
+                if (conseilDurationContinueBtn) {
                     const val = conseilDurationValue ? parseFloat(conseilDurationValue.value) : NaN;
-                    conseilContinueBtn.disabled = !(selected && !isNaN(val) && val > 0);
+                    conseilDurationContinueBtn.disabled = !(selected && !isNaN(val) && val > 0);
                 }
                 if (durationMonthsHidden) {
                     const val = conseilDurationValue ? parseFloat(conseilDurationValue.value) : NaN;
@@ -199,7 +322,7 @@
         const persoDurationValueLabel = document.getElementById('persoDurationValueLabel');
         const persoDurationValueLabelText = document.getElementById('persoDurationValueLabelText');
         const persoDurationValue = document.getElementById('persoDurationValue');
-        const persoContinueBtn = document.getElementById('persoContinueBtn');
+        const persoDurationContinueBtn = document.getElementById('persoDurationContinueBtn');
         const persoTargetUnitRadios = document.querySelectorAll('input[name="persoTargetUnit"]');
         const persoTargetValue = document.getElementById('persoTargetValue');
         const persoTargetValueLabelText = document.getElementById('persoTargetValueLabelText');
@@ -240,9 +363,9 @@
                         persoDurationValueLabelText.textContent = 'Nombre de mois';
                     }
                 }
-                if (persoContinueBtn) {
+                if (persoDurationContinueBtn) {
                     const val = persoDurationValue ? parseFloat(persoDurationValue.value) : NaN;
-                    persoContinueBtn.disabled = !(selected && !isNaN(val) && val > 0);
+                    persoDurationContinueBtn.disabled = !(selected && !isNaN(val) && val > 0);
                 }
                 if (durationMonthsHidden) {
                     const val = persoDurationValue ? parseFloat(persoDurationValue.value) : NaN;
@@ -437,8 +560,6 @@
             return `${sign}${abs.toFixed(1)}`;
         }
 
-        function estimateImc(weight, heightCm) {
-
         function capTheoreticalDelta(delta, currentWeight) {
             const d = toNum(delta);
             const w = toNum(currentWeight);
@@ -448,6 +569,8 @@
             const maxChange = Math.max(3, w * 0.25);
             return Math.max(-maxChange, Math.min(maxChange, d));
         }
+
+        function estimateImc(weight, heightCm) {
             const w = toNum(weight);
             const h = toNum(heightCm);
             if (isNaN(w) || isNaN(h) || h <= 0) return NaN;
@@ -828,6 +951,10 @@
             if (conseilFreqLabel) {
                 conseilFreqLabel.style.display = selected && selected.value === '1' ? '' : 'none';
             }
+            const conseilSportContinueBtn = document.getElementById('conseilSportContinueBtn');
+            if (conseilSportContinueBtn) {
+                conseilSportContinueBtn.disabled = !selected;
+            }
             if (selectedSportFrequencyInput) {
                 selectedSportFrequencyInput.value = selected && selected.value === '1'
                     ? String(document.getElementById('conseilFreqRange')?.value || 0)
@@ -859,6 +986,10 @@
             const selected = Array.from(persoAddSportRadios).find(r => r.checked);
             if (persoFreqLabel) {
                 persoFreqLabel.style.display = selected && selected.value === '1' ? '' : 'none';
+            }
+            const persoSportContinueBtn = document.getElementById('persoSportContinueBtn');
+            if (persoSportContinueBtn) {
+                persoSportContinueBtn.disabled = !selected;
             }
             if (selectedSportFrequencyInput) {
                 selectedSportFrequencyInput.value = selected && selected.value === '1'
@@ -896,6 +1027,7 @@
                 } else if (persoPaymentSelect && !document.querySelector('[data-step="perso-6"]')?.hidden) {
                     if (paymentTypeHidden) paymentTypeHidden.value = persoPaymentSelect.value || '';
                 }
+                saveWizardState(currentStep);
             });
         }
 

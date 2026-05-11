@@ -105,17 +105,17 @@ class Regime extends BaseController
 
         if (!is_numeric($weight) || (float) $weight <= 0 || !is_numeric($height) || (float) $height <= 0) {
             $session->setFlashdata('flash_error', 'Veuillez renseigner un poids et une taille valides.');
-            return redirect()->to('/regime/create');
+                return redirect()->to('/regime/create')->withInput();
         }
 
         if (!in_array($mode, ['suggested', 'custom'], true)) {
             $session->setFlashdata('flash_error', 'Veuillez choisir un mode de régime valide.');
-            return redirect()->to('/regime/create');
+                return redirect()->to('/regime/create')->withInput();
         }
 
         if ($mode === 'custom' && (!is_numeric($targetValue) || (float) $targetValue <= 0 || !in_array($targetUnit, ['bmi', 'weight'], true))) {
             $session->setFlashdata('flash_error', 'Veuillez renseigner un objectif personnalisé valide.');
-            return redirect()->to('/regime/create');
+                return redirect()->to('/regime/create')->withInput();
         }
 
         $payload = [
@@ -140,6 +140,6 @@ class Regime extends BaseController
         }
 
         $session->setFlashdata('flash_error', $result['message'] ?? 'Impossible de créer le régime.');
-        return redirect()->to('/regime/create');
+            return redirect()->to('/regime/create')->withInput();
     }
 }

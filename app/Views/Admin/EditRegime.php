@@ -36,7 +36,7 @@
                 </div>
                 <div class="field">
                     <label>Efficacité (poids)</label>
-                    <input type="number" step="0.01" name="EfficacitePoids" value="<?= isset($regime['EfficacitePoids']) ? number_format((float)$regime['EfficacitePoids'],2) : '' ?>">
+                    <input type="number" step="0.01" name="EfficacitePoidsParSemaine" value="<?= isset($regime['EfficacitePoidsParSemaine']) ? number_format((float)$regime['EfficacitePoidsParSemaine'],2) : '' ?>">
                 </div>
                 <div class="field">
                     <label>Viande (%)</label>

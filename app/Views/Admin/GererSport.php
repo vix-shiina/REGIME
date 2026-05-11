@@ -39,7 +39,7 @@
                 </div>
                 <div class="field">
                     <label>Efficacité (poids)</label>
-                    <input type="number" step="0.01" name="EfficacitePoids">
+                    <input type="number" step="0.01" name="EfficacitePoidsParSceance">
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" type="submit">Créer</button>
@@ -69,7 +69,7 @@
                                 <td style="padding:10px 8px"><?= esc((string)($s['Id'] ?? '')) ?></td>
                                 <td style="padding:10px 8px"><?= esc((string)($s['SportNom'] ?? '')) ?></td>
                                 <td style="padding:10px 8px"><?= esc((string)($s['Categorie'] ?? '')) ?></td>
-                                <td style="padding:10px 8px"><?= isset($s['EfficacitePoids']) ? number_format((float)$s['EfficacitePoids'],2) : '' ?></td>
+                                <td style="padding:10px 8px"><?= isset($s['EfficacitePoidsParSceance']) ? number_format((float)$s['EfficacitePoidsParSceance'],2) : '' ?></td>
                                 <td style="padding:10px 8px">
                                     <a class="btn btn-secondary" href="/admin/sports/edit/<?= $s['Id'] ?>">Modifier</a>
                                     <form method="post" action="/admin/sports/delete/<?= $s['Id'] ?>" style="display:inline-block;margin-left:8px" onsubmit="return confirm('Confirmer la suppression du sport ID <?= $s['Id'] ?> ?')">

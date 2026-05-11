@@ -8,7 +8,7 @@ class RegimeModel extends Model
 {
     protected $table      = 'REGIME';
     protected $primaryKey = 'Id';
-    protected $allowedFields = ['RegimeNom', 'TypeDeRegimeId', 'PrixJournaliere', 'EfficacitePoids'];
+    protected $allowedFields = ['RegimeNom', 'TypeDeRegimeId', 'PrixJournaliere', 'EfficacitePoidsParSemaine'];
 
     
     public function getRegimesWithDetails()
@@ -34,7 +34,7 @@ class RegimeModel extends Model
             'RegimeNom' => $nom,
             'TypeDeRegimeId' => $typeId,
             'PrixJournaliere' => $prix,
-            'EfficacitePoids' => $efficacite
+            'EfficacitePoidsParSemaine' => $efficacite
         ];
         $this->insert($data);
         $this->db->table('CompoRegime')->insert([
@@ -52,7 +52,7 @@ class RegimeModel extends Model
             'RegimeNom' => $nom,
             'TypeDeRegimeId' => $typeId,
             'PrixJournaliere' => $prix,
-            'EfficacitePoids' => $efficacite
+            'EfficacitePoidsParSemaine' => $efficacite
         ];
         $this->update($id, $data);
         $this->db->table('CompoRegime')->where('RegimeId', $id)->update([

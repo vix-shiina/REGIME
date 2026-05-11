@@ -70,7 +70,7 @@
                 $this->request->getPost('RegimeNom'),
                 $this->request->getPost('TypeDeRegimeId'),
                 $this->request->getPost('PrixJournaliere'),
-                $this->request->getPost('EfficacitePoids'),
+                $this->request->getPost('EfficacitePoidsParSemaine'),
                 $this->request->getPost('Viande'),
                 $this->request->getPost('Poisson'),
                 $this->request->getPost('Volailles')
@@ -84,7 +84,7 @@
             $sportModel->createSport(
                 $this->request->getPost('SportNom'),
                 $this->request->getPost('TypeDeSportId'),
-                $this->request->getPost('EfficacitePoids')
+                $this->request->getPost('EfficacitePoidsParSceance')
             );
             return redirect()->to('/admin/sports');
         }
@@ -145,7 +145,7 @@
                 $this->request->getPost('RegimeNom'),
                 $this->request->getPost('TypeDeRegimeId'),
                 $this->request->getPost('PrixJournaliere'),
-                $this->request->getPost('EfficacitePoids'),
+                $this->request->getPost('EfficacitePoidsParSemaine'),
                 $this->request->getPost('Viande'),
                 $this->request->getPost('Poisson'),
                 $this->request->getPost('Volailles')
@@ -181,7 +181,7 @@
                 $id,
                 $this->request->getPost('SportNom'),
                 $this->request->getPost('TypeDeSportId'),
-                $this->request->getPost('EfficacitePoids')
+                $this->request->getPost('EfficacitePoidsParSceance')
             );
             return redirect()->to('/admin/sports');
         }

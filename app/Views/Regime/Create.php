@@ -13,8 +13,25 @@ $user = $user ?? [];
 $sports = $sports ?? [];
 $initialPreview = $initialPreview ?? null;
 
-$initialWeight = !empty($user['Poids']) ? (float) $user['Poids'] : null;
-$initialHeightCm = !empty($user['Taille']) ? (float) $user['Taille'] : null;
+$oldWeight = old('weight', $user['Poids'] ?? '');
+$oldHeight = old('height', $user['Taille'] ?? '');
+$oldMode = old('mode', '');
+$oldDurationMonths = old('duration_months', '');
+$oldPaymentType = old('payment_type', '');
+$oldTargetUnit = old('target_unit', 'bmi');
+$oldTargetValue = old('target_value', '');
+$oldSportId = old('sport_id', '');
+$oldSportFrequency = old('sport_frequency', '0');
+$oldSelectedRegimeId = old('selected_regime_id', '');
+$oldConseilDurationUnit = old('conseil_duration_unit', '');
+$oldConseilDurationValue = old('conseil_duration_value', '');
+$oldConseilAddSport = old('conseil_add_sport', '');
+$oldPersoDurationUnit = old('perso_duration_unit', '');
+$oldPersoDurationValue = old('perso_duration_value', '');
+$oldPersoAddSport = old('perso_add_sport', '');
+
+$initialWeight = is_numeric($oldWeight) ? (float) $oldWeight : (!empty($user['Poids']) ? (float) $user['Poids'] : null);
+$initialHeightCm = is_numeric($oldHeight) ? (float) $oldHeight : (!empty($user['Taille']) ? (float) $user['Taille'] : null);
 $initialHeightM = !empty($initialHeightCm) ? $initialHeightCm / 100 : null;
 $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
     ? round($initialWeight / ($initialHeightM * $initialHeightM), 1)
@@ -34,14 +51,20 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
         <div class="form-alert" id="wizardAlert" hidden></div>
 
         <form id="regimeForm" class="wizard-form" method="post" action="/regime/create">
-            <input type="hidden" name="mode" id="modeInput" value="">
-            <input type="hidden" name="duration_months" id="durationMonthsHidden" value="">
-            <input type="hidden" name="selected_regime_id" id="selectedRegimeId" value="">
-            <input type="hidden" name="sport_id" id="selectedSportId" value="">
-            <input type="hidden" name="sport_frequency" id="selectedSportFrequency" value="0">
-            <input type="hidden" name="target_unit" id="targetUnitHidden" value="">
-            <input type="hidden" name="target_value" id="targetValueHidden" value="">
-            <input type="hidden" name="payment_type" id="paymentTypeHidden" value="">
+            <input type="hidden" name="mode" id="modeInput" value="<?= htmlspecialchars((string) $oldMode) ?>">
+            <input type="hidden" name="duration_months" id="durationMonthsHidden" value="<?= htmlspecialchars((string) $oldDurationMonths) ?>">
+            <input type="hidden" name="selected_regime_id" id="selectedRegimeId" value="<?= htmlspecialchars((string) $oldSelectedRegimeId) ?>">
+            <input type="hidden" name="sport_id" id="selectedSportId" value="<?= htmlspecialchars((string) $oldSportId) ?>">
+            <input type="hidden" name="sport_frequency" id="selectedSportFrequency" value="<?= htmlspecialchars((string) $oldSportFrequency) ?>">
+            <input type="hidden" name="target_unit" id="targetUnitHidden" value="<?= htmlspecialchars((string) $oldTargetUnit) ?>">
+            <input type="hidden" name="target_value" id="targetValueHidden" value="<?= htmlspecialchars((string) $oldTargetValue) ?>">
+            <input type="hidden" name="payment_type" id="paymentTypeHidden" value="<?= htmlspecialchars((string) $oldPaymentType) ?>">
+            <input type="hidden" name="conseil_duration_unit" id="conseilDurationUnitHidden" value="<?= htmlspecialchars((string) $oldConseilDurationUnit) ?>">
+            <input type="hidden" name="conseil_duration_value" id="conseilDurationValueHidden" value="<?= htmlspecialchars((string) $oldConseilDurationValue) ?>">
+            <input type="hidden" name="conseil_add_sport" id="conseilAddSportHidden" value="<?= htmlspecialchars((string) $oldConseilAddSport) ?>">
+            <input type="hidden" name="perso_duration_unit" id="persoDurationUnitHidden" value="<?= htmlspecialchars((string) $oldPersoDurationUnit) ?>">
+            <input type="hidden" name="perso_duration_value" id="persoDurationValueHidden" value="<?= htmlspecialchars((string) $oldPersoDurationValue) ?>">
+            <input type="hidden" name="perso_add_sport" id="persoAddSportHidden" value="<?= htmlspecialchars((string) $oldPersoAddSport) ?>">
 
             <!-- ÉTAPE 0 (pas comptée) : Poids + Taille -->
             <section class="wizard-panel is-visible" data-step="0">
@@ -57,9 +80,9 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                                 <select id="weightSelect" disabled>
                                     <option value="<?php echo htmlspecialchars((string)$user['Poids']); ?>"><?php echo htmlspecialchars((string)$user['Poids']); ?> kg (profil)</option>
                                 </select>
-                                <input type="hidden" name="weight" id="weightInput" value="<?php echo htmlspecialchars((string)$user['Poids']); ?>">
+                                <input type="hidden" name="weight" id="weightInput" value="<?php echo htmlspecialchars((string)$oldWeight); ?>">
                             <?php else: ?>
-                                <input type="number" step="0.1" min="0" name="weight" id="weightInput" value="" placeholder="Ex. 62.5">
+                                <input type="number" step="0.1" min="0" name="weight" id="weightInput" value="<?= htmlspecialchars((string) $oldWeight) ?>" placeholder="Ex. 62.5">
                             <?php endif; ?>
                         </label>
                         <label>
@@ -68,9 +91,9 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                                 <select id="heightSelect" disabled>
                                     <option value="<?php echo htmlspecialchars((string)$user['Taille']); ?>"><?php echo htmlspecialchars((string)$user['Taille']); ?> cm (profil)</option>
                                 </select>
-                                <input type="hidden" name="height" id="heightInput" value="<?php echo htmlspecialchars((string)$user['Taille']); ?>">
+                                <input type="hidden" name="height" id="heightInput" value="<?php echo htmlspecialchars((string)$oldHeight); ?>">
                             <?php else: ?>
-                                <input type="number" step="0.1" min="0" name="height" id="heightInput" value="" placeholder="Ex. 170">
+                                <input type="number" step="0.1" min="0" name="height" id="heightInput" value="<?= htmlspecialchars((string) $oldHeight) ?>" placeholder="Ex. 170">
                             <?php endif; ?>
                         </label>
                     </div>
@@ -94,11 +117,11 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
 
                     <div class="field-grid" style="display:flex;gap:12px;margin-bottom:16px">
                         <label style="display:flex;align-items:center;gap:6px;padding:10px 14px;border:2px solid #e6eef6;border-radius:6px;cursor:pointer;transition:all 0.2s;flex:1;font-size:0.95em">
-                            <input type="radio" name="modeChoice" value="perso" id="modePerso" style="margin:0;width:18px;height:18px;cursor:pointer">
+                            <input type="radio" name="modeChoice" value="perso" id="modePerso" style="margin:0;width:18px;height:18px;cursor:pointer" <?= $oldMode === 'custom' ? 'checked' : '' ?>>
                             <span>Créer mon régime</span>
                         </label>
                         <label style="display:flex;align-items:center;gap:6px;padding:10px 14px;border:2px solid #e6eef6;border-radius:6px;cursor:pointer;transition:all 0.2s;flex:1;font-size:0.95em">
-                            <input type="radio" name="modeChoice" value="conseil" id="modeConseil" style="margin:0;width:18px;height:18px;cursor:pointer">
+                            <input type="radio" name="modeChoice" value="conseil" id="modeConseil" style="margin:0;width:18px;height:18px;cursor:pointer" <?= $oldMode === 'suggested' ? 'checked' : '' ?>>
                             <span>Conseillez moi</span>
                         </label>
                     </div>
@@ -122,18 +145,18 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                             <span>Type d'objectif</span>
                             <div style="display:flex;gap:12px;margin-top:8px">
                                 <label style="display:flex;align-items:center;gap:6px;padding:10px 14px;border:2px solid #e6eef6;border-radius:6px;cursor:pointer;transition:all 0.2s;flex:1;font-size:0.95em">
-                                    <input type="radio" name="persoTargetUnit" value="bmi" id="persoTargetUnitBmi" checked style="margin:0;width:18px;height:18px;cursor:pointer">
+                                    <input type="radio" name="persoTargetUnit" value="bmi" id="persoTargetUnitBmi" style="margin:0;width:18px;height:18px;cursor:pointer" <?= $oldTargetUnit !== 'weight' ? 'checked' : '' ?>>
                                     <span>IMC cible</span>
                                 </label>
                                 <label style="display:flex;align-items:center;gap:6px;padding:10px 14px;border:2px solid #e6eef6;border-radius:6px;cursor:pointer;transition:all 0.2s;flex:1;font-size:0.95em">
-                                    <input type="radio" name="persoTargetUnit" value="weight" id="persoTargetUnitWeight" style="margin:0;width:18px;height:18px;cursor:pointer">
+                                    <input type="radio" name="persoTargetUnit" value="weight" id="persoTargetUnitWeight" style="margin:0;width:18px;height:18px;cursor:pointer" <?= $oldTargetUnit === 'weight' ? 'checked' : '' ?>>
                                     <span>Poids cible (kg)</span>
                                 </label>
                             </div>
                         </label>
                         <label>
                             <span id="persoTargetValueLabelText">IMC cible</span>
-                            <input type="number" step="0.1" min="10" id="persoTargetValue" placeholder="Ex. 22.0">
+                            <input type="number" step="0.1" min="10" id="persoTargetValue" value="<?= htmlspecialchars((string) $oldTargetValue) ?>" placeholder="Ex. 22.0">
                         </label>
                     </div>
 
@@ -156,24 +179,24 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                             <span>Choisir l'unité</span>
                             <div class="duration-buttons">
                                 <label class="duration-btn">
-                                    <input type="radio" name="conseilDurationUnit" value="months" id="conseilDurationMonthsRadio">
+                                    <input type="radio" name="conseilDurationUnit" value="months" id="conseilDurationMonthsRadio" <?= $oldConseilDurationUnit === 'months' ? 'checked' : '' ?>>
                                     <span>Mois</span>
                                 </label>
                                 <label class="duration-btn">
-                                    <input type="radio" name="conseilDurationUnit" value="weeks" id="conseilDurationWeeksRadio">
+                                    <input type="radio" name="conseilDurationUnit" value="weeks" id="conseilDurationWeeksRadio" <?= $oldConseilDurationUnit === 'weeks' ? 'checked' : '' ?>>
                                     <span>Semaines</span>
                                 </label>
                             </div>
                         </label>
                         <label id="conseilDurationValueLabel" style="display:none">
                             <span id="conseilDurationValueLabelText">Valeur</span>
-                            <input type="number" min="1" step="0.5" id="conseilDurationValue" placeholder="Ex. 3">
+                            <input type="number" min="1" step="0.5" id="conseilDurationValue" value="<?= htmlspecialchars((string) $oldConseilDurationValue) ?>" placeholder="Ex. 3">
                         </label>
                     </div>
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="0.5">Retour</button>
-                        <button type="button" id="conseilContinueBtn" class="submit-btn" data-go-step="conseil-2" disabled>Continuer</button>
+                        <button type="button" id="conseilDurationContinueBtn" class="submit-btn" data-go-step="conseil-2" disabled>Continuer</button>
                     </div>
                 </div>
             </section>
@@ -190,24 +213,24 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                             <span>Choisir l'unité</span>
                             <div class="duration-buttons">
                                 <label class="duration-btn">
-                                    <input type="radio" name="persoDurationUnit" value="months" id="persoDurationMonthsRadio">
+                                    <input type="radio" name="persoDurationUnit" value="months" id="persoDurationMonthsRadio" <?= $oldPersoDurationUnit === 'months' ? 'checked' : '' ?>>
                                     <span>Mois</span>
                                 </label>
                                 <label class="duration-btn">
-                                    <input type="radio" name="persoDurationUnit" value="weeks" id="persoDurationWeeksRadio">
+                                    <input type="radio" name="persoDurationUnit" value="weeks" id="persoDurationWeeksRadio" <?= $oldPersoDurationUnit === 'weeks' ? 'checked' : '' ?>>
                                     <span>Semaines</span>
                                 </label>
                             </div>
                         </label>
                         <label id="persoDurationValueLabel" style="display:none">
                             <span id="persoDurationValueLabelText">Valeur</span>
-                            <input type="number" min="1" step="0.5" id="persoDurationValue" placeholder="Ex. 3">
+                            <input type="number" min="1" step="0.5" id="persoDurationValue" value="<?= htmlspecialchars((string) $oldPersoDurationValue) ?>" placeholder="Ex. 3">
                         </label>
                     </div>
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="perso-1">Retour</button>
-                        <button type="button" id="persoContinueBtn" class="submit-btn" data-go-step="perso-3" disabled>Continuer</button>
+                        <button type="button" id="persoDurationContinueBtn" class="submit-btn" data-go-step="perso-3" disabled>Continuer</button>
                     </div>
                 </div>
             </section>
@@ -224,11 +247,11 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                             <span>Ajouter du sport</span>
                             <div class="duration-buttons">
                                 <label class="duration-btn">
-                                    <input type="radio" name="conseilAddSport" value="0" id="conseilAddSportNo">
+                                    <input type="radio" name="conseilAddSport" value="0" id="conseilAddSportNo" <?= $oldConseilAddSport === '0' ? 'checked' : '' ?>>
                                     <span>Non</span>
                                 </label>
                                 <label class="duration-btn">
-                                    <input type="radio" name="conseilAddSport" value="1" id="conseilAddSportYes">
+                                    <input type="radio" name="conseilAddSport" value="1" id="conseilAddSportYes" <?= $oldConseilAddSport === '1' ? 'checked' : '' ?>>
                                     <span>Oui</span>
                                 </label>
                             </div>
@@ -261,11 +284,11 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
                             <span>Ajouter du sport</span>
                             <div class="duration-buttons">
                                 <label class="duration-btn">
-                                    <input type="radio" name="persoAddSport" value="0" id="persoAddSportNo">
+                                    <input type="radio" name="persoAddSport" value="0" id="persoAddSportNo" <?= $oldPersoAddSport === '0' ? 'checked' : '' ?>>
                                     <span>Non</span>
                                 </label>
                                 <label class="duration-btn">
-                                    <input type="radio" name="persoAddSport" value="1" id="persoAddSportYes">
+                                    <input type="radio" name="persoAddSport" value="1" id="persoAddSportYes" <?= $oldPersoAddSport === '1' ? 'checked' : '' ?>>
                                     <span>Oui</span>
                                 </label>
                             </div>
@@ -299,7 +322,7 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="conseil-2">Retour</button>
-                        <button type="button" class="submit-btn" data-go-step="conseil-4">Continuer</button>
+                        <button type="button" class="submit-btn" id="conseilSportContinueBtn" data-go-step="conseil-4" disabled>Continuer</button>
                     </div>
                 </div>
             </section>
@@ -317,7 +340,7 @@ $initialImc = (!empty($initialWeight) && !empty($initialHeightM))
 
                     <div class="action-row">
                         <button type="button" class="back-btn" data-go-step="perso-3">Retour</button>
-                        <button type="button" class="submit-btn" data-go-step="perso-5">Continuer</button>
+                        <button type="button" class="submit-btn" id="persoSportContinueBtn" data-go-step="perso-5" disabled>Continuer</button>
                     </div>
                 </div>
             </section>

@@ -53,7 +53,7 @@
                         </div>
                         <div class="field">
                             <label>Efficacité (poids)</label>
-                            <input type="number" step="0.01" name="EfficacitePoids">
+                            <input type="number" step="0.01" name="EfficacitePoidsParSemaine">
                         </div>
                     </div>
                     <div class="col percentages">
@@ -104,7 +104,7 @@
                                 <td style="padding:10px 8px"><?= esc((string)($r['RegimeNom'] ?? '')) ?></td>
                                 <td style="padding:10px 8px"><?= esc((string)($r['TypeNom'] ?? $r['TypeDeRegime'] ?? '')) ?></td>
                                 <td style="padding:10px 8px"><?= isset($r['PrixJournaliere']) ? number_format((float)$r['PrixJournaliere'],2) : '' ?></td>
-                                <td style="padding:10px 8px"><?= isset($r['EfficacitePoids']) ? number_format((float)$r['EfficacitePoids'],2) : '' ?></td>
+                                <td style="padding:10px 8px"><?= isset($r['EfficacitePoidsParSemaine']) ? number_format((float)$r['EfficacitePoidsParSemaine'],2) : '' ?></td>
                                 <td style="padding:10px 8px"><?= isset($r['Viande']) ? number_format((float)$r['Viande'],2) . '%' : '' ?></td>
                                 <td style="padding:10px 8px"><?= isset($r['Poisson']) ? number_format((float)$r['Poisson'],2) . '%' : '' ?></td>
                                 <td style="padding:10px 8px"><?= isset($r['Volailles']) ? number_format((float)$r['Volailles'],2) . '%' : '' ?></td>

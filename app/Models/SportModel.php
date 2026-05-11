@@ -5,7 +5,7 @@ use CodeIgniter\Model;
 class SportModel extends Model {
     protected $table = 'SPORT';
     protected $primaryKey = 'Id';
-    protected $allowedFields = ['SportNom', 'TypeDeSportId', 'EfficacitePoids'];
+    protected $allowedFields = ['SportNom', 'TypeDeSportId', 'EfficacitePoidsParSceance'];
 
     public function getSportsWithTypes() {
         return $this->select('SPORT.*, TypeDeSport.TypeDeSport as Categorie')
@@ -25,7 +25,7 @@ class SportModel extends Model {
         $data = [
             'SportNom' => $nom,
             'TypeDeSportId' => $typeId,
-            'EfficacitePoids' => $efficacite
+            'EfficacitePoidsParSceance' => $efficacite
         ];
         return $this->insert($data);
     }
@@ -34,7 +34,7 @@ class SportModel extends Model {
         $data = [
             'SportNom' => $nom,
             'TypeDeSportId' => $typeId,
-            'EfficacitePoids' => $efficacite
+            'EfficacitePoidsParSceance' => $efficacite
         ];
         return $this->update($id, $data);
     }

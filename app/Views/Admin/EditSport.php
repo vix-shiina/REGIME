@@ -32,7 +32,7 @@
                 </div>
                 <div class="field">
                     <label>Efficacité (poids)</label>
-                    <input type="number" step="0.01" name="EfficacitePoids" value="<?= isset($sport['EfficacitePoids']) ? number_format((float)$sport['EfficacitePoids'],2) : '' ?>">
+                    <input type="number" step="0.01" name="EfficacitePoidsParSceance" value="<?= isset($sport['EfficacitePoidsParSceance']) ? number_format((float)$sport['EfficacitePoidsParSceance'],2) : '' ?>">
                 </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" type="submit">Enregistrer</button>
