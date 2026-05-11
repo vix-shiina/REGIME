@@ -7,6 +7,10 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 $routes->get('/dashboard', 'Dashboard::index');
+$routes->post('/dashboard/select-regime', 'Dashboard::selectRegime');
+$routes->post('/dashboard/select-regime/(:num)', 'Dashboard::selectRegime/$1');
+$routes->post('/dashboard/select-sport', 'Dashboard::selectSport');
+$routes->post('/dashboard/select-sport/(:num)', 'Dashboard::selectSport/$1');
 
 //une route ajoutée!!!!
 $routes->post('dashboard/ajouterPoids', 'Dashboard::ajouterPoids'); 
