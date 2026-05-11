@@ -12,7 +12,7 @@
         <h1>Espace Admin</h1>
         <p>Gestion rapide des principales sections</p>
         <div class="header-actions">
-            <a class="btn btn-secondary" href="/auth/login">Retour au login</a>
+            <a class="btn btn-secondary" href="/SignIn">Retour au login</a>
         </div>
     </header>
 
