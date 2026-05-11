@@ -47,10 +47,22 @@ class TraitementRegime
                     r.RegimeNom,
                     r.PrixJournaliere,
                     r.EfficacitePoidsParSemaine,
-                    tdr.TypeDeRegime
+                    tdr.TypeDeRegime,
+                    su.Id AS SportUserId,
+                    su.SportId,
+                    su.DureeEnJours AS SportDureeEnJours,
+                    s.SportNom,
+                    s.EfficacitePoidsParSceance,
+                    ts.TypeDeSport,
+                    ui.Poids AS PoidsActuel,
+                    (SELECT e.Poids FROM Evolution e WHERE e.UserId = ru.UserId ORDER BY e.DateEvolution ASC LIMIT 1) AS PoidsDepart
              FROM RegimeUser ru
              LEFT JOIN REGIME r ON r.Id = ru.RegimeId
              LEFT JOIN TypeDeRegime tdr ON tdr.Id = r.TypeDeRegimeId
+             LEFT JOIN SportUser su ON su.UserId = ru.UserId AND su.DateDebut = ru.DateDebut
+             LEFT JOIN SPORT s ON s.Id = su.SportId
+             LEFT JOIN TypeDeSport ts ON ts.Id = s.TypeDeSportId
+             LEFT JOIN UserInfo ui ON ui.UserId = ru.UserId
              WHERE ru.UserId = ?
              ORDER BY ru.DateDebut DESC
              LIMIT 1'
